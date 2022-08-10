@@ -38,9 +38,15 @@ export function calculateFrames(frames: Frames): CalcFrames {
 				values[i] = lastVal + 10 + nextFrame[0] + nextFrame[1];
 				currentValue += 10 + nextFrame[0] + nextFrame[1];
 			} else if (!nextFrame2) {
-				// Maybe Double
-				values[i] = null;
-				currentValue += 20;
+				if (i === 8 && nextFrame[1]) {
+					// 9th frame strike
+					values[i] = lastVal + 10 + nextFrame[0] + nextFrame[1];
+					currentValue += 10 + nextFrame[0] + nextFrame[1];
+				} else {
+					// Maybe Double
+					values[i] = null;
+					currentValue += 20;
+				}
 			} else if (nextFrame2[0] < 10) {
 				// Double
 				values[i] = lastVal + 20 + nextFrame2[0];

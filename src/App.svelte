@@ -1,17 +1,18 @@
 <script lang="ts">
+	import { onMount, onDestroy } from "svelte";
 	import type { Bowlers, Pins } from "./types";
 	import GameProgress from "./MainPanel/GameProgress.svelte";
 	import TopBar from "./TopBar.svelte";
 
 	const bowlers: Bowlers = {
-		DOM: /*    */ { score: 57, frames: [[7, 0], [3, 4], [7, 1], [10, 0], [0, 7], [5, 0], [5, 1]] },
-		JAYDEN: /* */ { score: 73, frames: [[9, 0], [3, 4], [7, 1], [10, 0], [1, 9], [5, 0], [8, 1]] },
-		AJ: /*     */ { score: 64, frames: [[7, 0], [3, 4], [7, 1], [10, 0], [0, 9], [5, 0], [9]] },
-		LOS34: /*  */ { score: 59, frames: [[7, 2], [3, 6], [7, 1], [10, 0], [0, 9], [5, 0]] },
-		EVERETT: /**/ { score: 20, frames: [[1, 0], [0, 2], [3, 1], [4, 0], [0, 5], [4, 0]] },
+		DOM: /*    */ { frames: [[7, 0], [3, 4], [7, 1], [10, 0], [0, 7], [5, 0], [5, 1]] },
+		JAYDEN: /* */ { frames: [[9, 0], [3, 4], [7, 1], [10, 0], [1, 9], [4, 1], [10, 0]] },
+		AJ: /*     */ { frames: [[7, 0], [3, 4], [7, 1], [10, 0], [0, 9], [5, 0], [9]] },
+		LOS34: /*  */ { frames: [[7, 2], [3, 6], [7, 1], [10, 0], [0, 9], [5, 0]] },
+		EVERETT: /**/ { frames: [[1, 0], [0, 2], [3, 1], [4, 0], [0, 5], [4, 0]] },
 	};
 	const pins: Pins = [5];
-	const currentBowler = "AJ";
+	let currentBowler = "AJ";
 	const currentFrame = 7;
 </script>
 

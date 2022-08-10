@@ -33,8 +33,9 @@
 			<Frame
 				frame={[]}
 				score={i + calc_frames.values.length + 1 === 11
-					? calc_frames.values.reduce((acc, val) => (val && val > acc ? val : acc))
+					? calc_frames.values.reduce((acc, val) => (val && val > acc ? val : acc), 0)
 					: null}
+				{currentFrame}
 				frameNumber={i + calc_frames.values.length + 1} />
 		{/each}
 	</div>
