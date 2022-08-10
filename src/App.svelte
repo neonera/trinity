@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { onMount, onDestroy } from "svelte";
 	import type { Bowlers, Pins } from "./types";
-	import GameProgress from "./MainPanel/GameProgress.svelte";
-	import TopBar from "./TopBar.svelte";
+	import UserScreen from "./UserScreen/UserScreen.svelte";
 
+	const screenType = "user";
+
+	// prettier-ignore
 	const bowlers: Bowlers = {
 		DOM: /*    */ { frames: [[7, 0], [3, 4], [7, 1], [10, 0], [0, 7], [5, 0], [5, 1]] },
 		JAYDEN: /* */ { frames: [[9, 0], [3, 4], [7, 1], [10, 0], [1, 9], [4, 1], [10, 0]] },
@@ -16,33 +17,8 @@
 	const currentFrame = 7;
 </script>
 
-<main style="display: flex; flex-direction: column; ">
-	<TopBar {bowlers} {pins} {currentBowler} {currentFrame} />
-	<div style="display: flex; flex: 1;">
-		<div class="main-panel">
-			<GameProgress {bowlers} />
-		</div>
-		<div class="right-bar" />
-	</div>
-</main>
-
-<style>
-	/* Main panel */
-
-	.main-panel {
-		flex: 1;
-		padding: 40px;
-
-		box-sizing: border-box;
-		display: flex;
-		flex-direction: column;
-	}
-
-	/* Right bar */
-
-	.right-bar {
-		width: 300px;
-
-		background-color: #28282a;
-	}
-</style>
+{#if screenType === "user"}
+	<UserScreen {bowlers} {pins} {currentBowler} {currentFrame} />
+{:else if screenType === "tv"}
+	<UserScreen {bowlers} {pins} {currentBowler} {currentFrame} /> <!-- This should be changed to a TVScreen -->
+{/if}

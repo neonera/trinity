@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Bowlers } from "../types";
-	import { calculateFrames, hslToHex, type CalcFrames } from "../smallFunctions";
-	import Progress from "../lib/Progress.svelte";
+	import type { Bowlers } from "../../types";
+	import { calculateFrames, hslToHex, type CalcFrames } from "../../smallFunctions";
+	import Progress from "../../lib/Progress.svelte";
 
 	export let bowlers: Bowlers;
 

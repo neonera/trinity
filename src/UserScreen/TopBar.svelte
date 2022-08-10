@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Icon from "@iconify/svelte";
-	import type { Bowlers, Pins } from "./types";
-	import { calculateFrames, type CalcFrames } from "./smallFunctions";
-	import Frame from "./TopBar/Frame.svelte";
+	import type { Bowlers, Pins } from "../types";
+	import { calculateFrames, type CalcFrames } from "../smallFunctions";
+	import Frame from "../lib/Frame.svelte";
 
 	export let bowlers: Bowlers;
 	export let pins: Pins;
