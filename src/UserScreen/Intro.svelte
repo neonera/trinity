@@ -54,44 +54,54 @@
 			<h1 class="welcome-text">
 				Welcome to <span style="color: {bowlingAlleyColor};">{bowlingAlleyName}</span>.
 			</h1>
-			<h1 class="bowlers-amount">{bowlerAmt} bowlers</h1>
+			{#if bowlerAmt > 0}
+				<h1 class="bowlers-amount">{bowlerAmt} bowlers</h1>
+			{/if}
 		</div>
 	</div>
-	{#if currentBowler > bowlerAmt && editingBowler === -1}
-		<div style="margin-top: 20px; flex: 1; display: flex; flex-direction: column; align-items: center;">
-			<h1>Bowler names:</h1>
-			<h1 style="font-size: 24px; color: #fff8; margin-bottom: 20px;">(press any name to change it)</h1>
-			{#each names as name, i}
-				<div
-					class="center confirm-name"
-					on:click={() => {
-						currentName = names[i];
-						editingBowler = i;
-					}}>
-					<h1>{name}</h1>
-				</div>
-			{/each}
+	{#if bowlerAmt === 0}
+		<div class="center" style="flex: 1;">
+			<h1 style="color: #fffa;">Waiting for bowlers...!</h1>
 		</div>
 	{:else}
-		<div style="margin-top: 20px; flex: 1; display: flex; flex-direction: column; align-items: center;">
-			<h1>
-				{editingBowler > -1 ? `Editing Bowler ${editingBowler + 1}` : `Bowler ${currentBowler}/${bowlerAmt}`}
-			</h1>
-			<div class="center" style="flex: 1;">
-				<h1 class="current-name" style={!currentName ? "color: #fff8;" : "border-color: #5c5f66;"}>
-					{currentName || "Type name here"}
-				</h1>
+		{#if currentBowler > bowlerAmt && editingBowler === -1}
+			<div style="margin-top: 20px; flex: 1; display: flex; flex-direction: column; align-items: center;">
+				<h1>Bowler names:</h1>
+				<h1 style="font-size: 24px; color: #fff8; margin-bottom: 20px;">(press any name to change it)</h1>
+				{#each names as name, i}
+					<div
+						class="center confirm-name"
+						on:click={() => {
+							currentName = names[i];
+							editingBowler = i;
+						}}>
+						<h1>{name}</h1>
+					</div>
+				{/each}
 			</div>
-			<Keyboard onSubmitKey={submitKey} style="margin-bottom: 20px;" />
+		{:else}
+			<div style="margin-top: 20px; flex: 1; display: flex; flex-direction: column; align-items: center;">
+				<h1>
+					{editingBowler > -1
+						? `Editing Bowler ${editingBowler + 1}`
+						: `Bowler ${currentBowler}/${bowlerAmt}`}
+				</h1>
+				<div class="center" style="flex: 1;">
+					<h1 class="current-name" style={!currentName ? "color: #fff8;" : "border-color: #5c5f66;"}>
+						{currentName || "Type name here"}
+					</h1>
+				</div>
+				<Keyboard onSubmitKey={submitKey} style="margin-bottom: 20px;" />
+			</div>
+		{/if}
+		<div class="bottom-right-content">
+			<h1>{error}</h1>
+			<div class="submit-button" on:click={submitButton}>
+				<Icon icon="ic:baseline-send" width={30} height={30} />
+				<h1>{currentBowler > bowlerAmt && editingBowler === -1 ? "Start Game" : "Submit"}</h1>
+			</div>
 		</div>
 	{/if}
-	<div class="bottom-right-content">
-		<h1>{error}</h1>
-		<div class="submit-button" on:click={submitButton}>
-			<Icon icon="ic:baseline-send" width={30} height={30} />
-			<h1>{currentBowler > bowlerAmt && editingBowler === -1 ? "Start Game" : "Submit"}</h1>
-		</div>
-	</div>
 </main>
 
 <style>

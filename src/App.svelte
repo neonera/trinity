@@ -1,15 +1,13 @@
 <script lang="ts">
 	import { onMount, onDestroy } from "svelte";
-	import { fade } from "svelte/transition";
 	import type { Bowlers, Pins } from "./types";
-	import Intro from "./UserScreen/Intro.svelte";
 	import UserScreen from "./UserScreen/UserScreen.svelte";
 	import TVScreen from "./TVScreen/TVScreen.svelte";
 
 	let bowlingAlleyName = "Lava Lanes";
 	let bowlingAlleyColor = "hsl(8deg, 75%, 50%)";
 	const laneNumber = 27;
-	let bowlerAmt = 3;
+	let bowlerAmt = 0;
 	let screenType = "";
 
 	// prettier-ignore
@@ -112,8 +110,10 @@
 		else if (event.key === "t") screenType = "tv";
 		else if (event.key === "b") {
 			bowlPins(randomPins());
-		} else if (Number.isInteger(+event.key)) bowlPins(randomPins(+event.key));
-		else if (event.key === "/") bowlPins(pins);
+		} else if (Number.isInteger(+event.key)) {
+			if (bowlerAmt === 0) bowlerAmt = +event.key;
+			else bowlPins(randomPins(+event.key));
+		} else if (event.key === "/") bowlPins(pins);
 		else if (event.key === "i") {
 			if (interval) {
 				clearInterval(interval);

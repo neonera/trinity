@@ -23,12 +23,16 @@
 		<h1>{laneNumber}</h1>
 	</div>
 	{#if Object.keys(bowlers).length === 0}
-		<h1 style="position: absolute; top: 20px; right: 20px;">{bowlerAmt} bowlers</h1>
+		{#if bowlerAmt > 0}
+			<h1 style="position: absolute; top: 20px; right: 20px;">{bowlerAmt} bowlers</h1>
+		{/if}
 		<div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
 			<h1 style="font-size: 48px;">
 				Welcome to <span style="color: {bowlingAlleyColor};">{bowlingAlleyName}</span>.
 			</h1>
-			<h1 style="margin-top: 10px; color: #fffa;">Waiting for bowler names...</h1>
+			{#if bowlerAmt > 0}
+				<h1 style="margin-top: 10px; color: #fffa;">Waiting for bowler names...</h1>
+			{/if}
 		</div>
 	{:else}
 		<div class="pins">
