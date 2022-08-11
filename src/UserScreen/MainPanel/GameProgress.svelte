@@ -6,9 +6,9 @@
 	export let bowlers: Bowlers;
 
 	let calc_frames: { [bowler: string]: CalcFrames } = {};
-	let first_place: string = "";
-	let second_place: string = "";
-	let third_place: string = "";
+	let first_place: string[] = [];
+	let second_place: string[] = [];
+	let third_place: string[] = [];
 	$: {
 		let f_score: number = 0;
 		let s_score: number = 0;
@@ -16,21 +16,28 @@
 		Object.keys(bowlers).forEach((bowler) => {
 			calc_frames[bowler] = calculateFrames(bowlers[bowler].frames);
 			const my_score = calc_frames[bowler].currentValue;
+			if (my_score === 0) return;
 			if (my_score > f_score) {
 				t_score = s_score;
 				s_score = f_score;
 				f_score = my_score;
 				third_place = second_place;
 				second_place = first_place;
-				first_place = bowler;
+				first_place = [bowler];
+			} else if (my_score === f_score) {
+				first_place.push(bowler);
 			} else if (my_score > s_score) {
 				t_score = s_score;
 				s_score = my_score;
 				third_place = second_place;
-				second_place = bowler;
+				second_place = [bowler];
+			} else if (my_score === s_score) {
+				second_place.push(bowler);
 			} else if (my_score > t_score) {
 				t_score = my_score;
-				third_place = bowler;
+				third_place = [bowler];
+			} else if (my_score === t_score) {
+				third_place.push(bowler);
 			}
 		});
 	}
@@ -41,15 +48,15 @@
 </div>
 {#each Object.keys(bowlers) as bowler, i}
 	<div style="display: flex; align-items: center; margin-top: 10px;">
-		{#if first_place === bowler}
+		{#if first_place.includes(bowler)}
 			<div class="place-badge" style="background-color: hsl(51deg 50% 55%);">
 				<h1>#1</h1>
 			</div>
-		{:else if second_place === bowler}
+		{:else if second_place.includes(bowler)}
 			<div class="place-badge" style="background-color: hsl(0deg 0% 60%);">
 				<h1>#2</h1>
 			</div>
-		{:else if third_place === bowler}
+		{:else if third_place.includes(bowler)}
 			<div class="place-badge" style="background-color: hsl(30deg 30% 50%);">
 				<h1>#3</h1>
 			</div>

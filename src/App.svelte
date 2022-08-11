@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { onMount, onDestroy } from "svelte";
-	import TVScreen from "./TVScreen/TVScreen.svelte";
 	import type { Bowlers, Pins } from "./types";
+	import Intro from "./UserScreen/Intro.svelte";
 	import UserScreen from "./UserScreen/UserScreen.svelte";
+	import TVScreen from "./TVScreen/TVScreen.svelte";
 
-	let screenType = "user";
+	let bowlingAlleyName = "Lava Lanes";
+	let bowlingAlleyColor = "hsl(8deg, 75%, 50%)";
+	const laneNumber = 27;
+	let bowlerAmt = 3;
+	let screenType = "";
 
 	// prettier-ignore
 	let bowlers: Bowlers = {
@@ -17,6 +22,11 @@
 	let pins: Pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 	let currentBowler = "AJ";
 	let currentFrame = 7;
+
+	bowlers = {};
+	pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+	currentBowler = "";
+	currentFrame = 1;
 
 	const bowlPins = (pins_knocked: Pins) => {
 		if (currentFrame === 11) return;
@@ -67,6 +77,16 @@
 		if (reset_pins) pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 	};
 
+	const startGame = (names: string[]) => {
+		names.forEach((name) => {
+			bowlers[name] = { frames: [] };
+		});
+		screenType = "user";
+		currentBowler = names[0];
+	};
+
+	// FOR DEMO PURPOSES:
+
 	const randomPins = (amt?: number) => {
 		// Only for testing purposes
 		const frames = bowlers[currentBowler].frames;
@@ -110,6 +130,13 @@
 				console.log(ms);
 				interval = setInterval(advanceGame, ms);
 			}
+		} else if (event.key === "n") {
+			const alley_names = ["Lava Lanes", "Roxy Ann Lanes", "Caveman Bowl"];
+			const alley_colors = ["hsl(8deg, 75%, 50%)", "hsl(355deg, 60%, 50%)", "hsl(180deg, 60%, 55%)"];
+			const next_index = alley_names.indexOf(bowlingAlleyName) + 1;
+			const back_to_start = next_index >= alley_names.length;
+			bowlingAlleyName = alley_names[back_to_start ? 0 : next_index];
+			bowlingAlleyColor = alley_colors[back_to_start ? 0 : next_index];
 		}
 	};
 
@@ -123,13 +150,32 @@
 		if (currentFrame === 11) clearInterval(interval);
 	};
 	let interval;
-	onMount(() => resetGame());
+	// resetGame();
 	onDestroy(() => clearInterval(interval));
 </script>
 
 <svelte:window on:keypress={keyPress} />
 {#if screenType === "user"}
-	<UserScreen {bowlers} {pins} {currentBowler} {currentFrame} />
+	<UserScreen
+		{bowlingAlleyName}
+		{bowlingAlleyColor}
+		{bowlerAmt}
+		{startGame}
+		{laneNumber}
+		{bowlers}
+		{pins}
+		{currentBowler}
+		{currentFrame} />
 {:else if screenType === "tv"}
-	<TVScreen {bowlers} {pins} {currentBowler} {currentFrame} />
+	<TVScreen
+		{bowlingAlleyName}
+		{bowlingAlleyColor}
+		{bowlerAmt}
+		{laneNumber}
+		{bowlers}
+		{pins}
+		{currentBowler}
+		{currentFrame} />
+{:else}
+	<main />
 {/if}

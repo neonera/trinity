@@ -1,3 +1,5 @@
+import type { Frames } from "./types";
+
 export function hslToHex(h: number, s: number, l: number): string {
 	l /= 100;
 	const a = (s * Math.min(l, 1 - l)) / 100;
@@ -13,7 +15,7 @@ export function hslToHex(h: number, s: number, l: number): string {
 
 export type CalcFrames = { values: (number | null)[]; currentValue: number };
 export function calculateFrames(frames: Frames): CalcFrames {
-	let values: CalcFrames.values = [];
+	let values: CalcFrames["values"] = [];
 	let currentValue: number = 0;
 	frames.forEach((frame, i) => {
 		let addition = 0;

@@ -1,23 +1,34 @@
 <script lang="ts">
 	import type { Bowlers, Pins } from "../types";
+	import Intro from "./Intro.svelte";
 	import GameProgress from "./MainPanel/GameProgress.svelte";
 	import TopBar from "./TopBar.svelte";
 
+	export let bowlingAlleyName: string;
+	export let bowlingAlleyColor: string;
+	export let bowlerAmt: number;
+	export let startGame: (names: string[]) => any;
+
+	export let laneNumber: number;
 	export let bowlers: Bowlers;
 	export let pins: Pins;
 	export let currentBowler: string;
 	export let currentFrame: number;
 </script>
 
-<main style="display: flex; flex-direction: column; ">
-	<TopBar {bowlers} {pins} {currentBowler} {currentFrame} />
-	<div style="display: flex; flex: 1;">
-		<div class="main-panel">
-			<GameProgress {bowlers} />
+{#if Object.keys(bowlers).length === 0}
+	<Intro {laneNumber} {bowlingAlleyName} {bowlingAlleyColor} {bowlerAmt} {startGame} />
+{:else}
+	<main style="display: flex; flex-direction: column; ">
+		<TopBar {laneNumber} {bowlers} {pins} {currentBowler} {currentFrame} />
+		<div style="display: flex; flex: 1;">
+			<div class="main-panel">
+				<GameProgress {bowlers} />
+			</div>
+			<div class="right-bar" />
 		</div>
-		<div class="right-bar" />
-	</div>
-</main>
+	</main>
+{/if}
 
 <style>
 	/* Main panel */

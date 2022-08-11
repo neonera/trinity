@@ -18,3 +18,9 @@ main {
 h1 {
 	font-family: Avenir;
 }
+
+.center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}

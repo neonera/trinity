@@ -5,6 +5,7 @@
 	import Frame from "../lib/Frame.svelte";
 	import DotPins from "../lib/DotPins.svelte";
 
+	export let laneNumber: number;
 	export let bowlers: Bowlers;
 	export let pins: Pins;
 	export let type: 10 | 9 | 5 = 10;
@@ -12,12 +13,12 @@
 	export let currentFrame: number;
 
 	let calc_frames: CalcFrames = { values: [], currentValue: 0 };
-	$: calc_frames = calculateFrames(bowlers[currentBowler].frames);
+	$: calc_frames = calculateFrames(bowlers[currentBowler]?.frames ?? []);
 </script>
 
 <div class="top-bar">
 	<div class="lane-number">
-		<h1>27</h1>
+		<h1>{laneNumber}</h1>
 	</div>
 	<div class="current-bowler">
 		<Icon icon="ic:baseline-account-circle" width={40} height={40} />
@@ -29,7 +30,7 @@
 	<div class="frames">
 		{#each [...Array(11).keys()] as i}
 			<Frame
-				frame={bowlers[currentBowler].frames[i] ?? []}
+				frame={bowlers[currentBowler]?.frames[i] ?? []}
 				score={i + 1 === 11
 					? calc_frames.values.reduce((acc, val) => (val && val > acc ? val : acc), 0)
 					: calc_frames.values[i] ?? null}

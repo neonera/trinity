@@ -4,6 +4,11 @@
 	import Frame from "../lib/Frame.svelte";
 	import DotPins from "../lib/DotPins.svelte";
 
+	export let bowlingAlleyName: string;
+	export let bowlingAlleyColor: string;
+	export let bowlerAmt: number;
+
+	export let laneNumber: number;
 	export let bowlers: Bowlers;
 	export let pins: Pins;
 	export let currentBowler: string;
@@ -13,36 +18,46 @@
 	$: Object.keys(bowlers).forEach((bowler) => (calc_frames[bowler] = calculateFrames(bowlers[bowler].frames)));
 </script>
 
-<main style="padding-top: 100px;">
+<main style={Object.keys(bowlers).length > 0 ? "padding-top: 100px;" : ""}>
 	<div class="lane-number">
-		<h1>27</h1>
+		<h1>{laneNumber}</h1>
 	</div>
-	<div class="pins">
-		<DotPins {pins} />
-	</div>
-	{#each Object.keys(bowlers) as bowler, bowler_index}
-		<div class="bowler-row">
-			<div
-				class="bowler-name"
-				style={(bowler_index === 0 ? "margin-top: 30px;" : "") +
-					(bowler === currentBowler ? "background-color: hsl(220deg 50% 55%);" : "")}>
-				<h1 style={"width: 200px;"}>{bowler}</h1>
-			</div>
-			{#each [...Array(11).keys()] as i}
-				<Frame
-					frame={bowlers[bowler].frames[i] ?? []}
-					score={i + 1 === 11
-						? calc_frames[bowler].values.reduce((acc, val) => (val && val > acc ? val : acc), 0)
-						: calc_frames[bowler].values[i] ?? null}
-					{currentFrame}
-					frameNumber={i + 1}
-					showFrameNumber={bowler_index === 0}
-					style={bowler_index === 0 ? "height: 110px;" : ""}
-					tvSize
-					hide={bowler !== currentBowler} />
-			{/each}
+	{#if Object.keys(bowlers).length === 0}
+		<h1 style="position: absolute; top: 20px; right: 20px;">{bowlerAmt} bowlers</h1>
+		<div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+			<h1 style="font-size: 48px;">
+				Welcome to <span style="color: {bowlingAlleyColor};">{bowlingAlleyName}</span>.
+			</h1>
+			<h1 style="margin-top: 10px; color: #fffa;">Waiting for bowler names...</h1>
 		</div>
-	{/each}
+	{:else}
+		<div class="pins">
+			<DotPins {pins} />
+		</div>
+		{#each Object.keys(bowlers) as bowler, bowler_index}
+			<div class="bowler-row">
+				<div
+					class="bowler-name"
+					style={(bowler_index === 0 ? "margin-top: 30px;" : "") +
+						(bowler === currentBowler ? "background-color: hsl(220deg 50% 55%);" : "")}>
+					<h1 style={"width: 200px;"}>{bowler}</h1>
+				</div>
+				{#each [...Array(11).keys()] as i}
+					<Frame
+						frame={bowlers[bowler].frames[i] ?? []}
+						score={i + 1 === 11
+							? calc_frames[bowler].values.reduce((acc, val) => (val && val > acc ? val : acc), 0)
+							: calc_frames[bowler].values[i] ?? null}
+						{currentFrame}
+						frameNumber={i + 1}
+						showFrameNumber={bowler_index === 0}
+						style={bowler_index === 0 ? "height: 110px;" : ""}
+						tvSize
+						hide={bowler !== currentBowler} />
+				{/each}
+			</div>
+		{/each}
+	{/if}
 </main>
 
 <style>
