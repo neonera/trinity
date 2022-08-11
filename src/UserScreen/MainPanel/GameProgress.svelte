@@ -63,7 +63,7 @@
 		{:else}
 			<div class="place-badge" />
 		{/if}
-		<h1 style="width: 200px;">{bowler}</h1>
+		<h1 class="name">{bowler}</h1>
 		<Progress
 			value={calc_frames[bowler].currentValue}
 			height={60}
@@ -81,6 +81,13 @@
 
 		border-radius: 40px;
 		background-color: #404244;
+	}
+	.name {
+		width: 200px;
+
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
 	}
 
 	.place-badge {

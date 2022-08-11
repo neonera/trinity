@@ -86,10 +86,15 @@
 		align-items: center;
 	}
 	.current-bowler > div {
+		width: calc(100% - 70px);
 		margin-left: 10px;
 	}
 	.current-bowler > div > h1 {
 		font-size: 28px;
+
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
 	}
 	.current-bowler-text {
 		position: absolute;

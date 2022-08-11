@@ -40,7 +40,7 @@
 					class="bowler-name"
 					style={(bowler_index === 0 ? "margin-top: 30px;" : "") +
 						(bowler === currentBowler ? "background-color: hsl(220deg 50% 55%);" : "")}>
-					<h1 style={"width: 200px;"}>{bowler}</h1>
+					<h1>{bowler}</h1>
 				</div>
 				{#each [...Array(11).keys()] as i}
 					<Frame
@@ -108,5 +108,9 @@
 	}
 	.bowler-name > h1 {
 		margin-left: 20px;
+
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
 	}
 </style>
