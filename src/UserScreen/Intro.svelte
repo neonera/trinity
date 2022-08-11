@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Bowlers } from "../types";
 	import Icon from "@iconify/svelte";
 	import Keyboard from "../lib/Keyboard.svelte";
 
@@ -12,15 +11,23 @@
 	let currentBowler: number = 1;
 	let currentName: string = "";
 	let names: string[] = [];
+	let error: string = "";
 
 	const submitKey = (key: string) => {
+		error = "";
 		if (key === "backspace") {
 			if (currentName.length > 0) currentName = currentName.slice(0, -1);
 		} else if (currentName.length < 16) currentName += key;
 	};
 
 	const submitButton = () => {
-		if (currentName) {
+		if (!currentName) {
+			error = "You can't have an empty name.";
+		} else if (!isNaN(+currentName)) {
+			error = "Your name needs at least one letter.";
+		} else if (names.includes(currentName)) {
+			error = "Someone is already named that.";
+		} else {
 			names.push(currentName);
 			currentName = "";
 		    currentBowler++;
@@ -50,9 +57,12 @@
 		</div>
 		<Keyboard onSubmitKey={submitKey} style="margin-bottom: 20px;" />
 	</div>
-	<div class="submit-button" on:click={submitButton}>
-		<Icon icon="ic:baseline-send" width={30} height={30} />
-		<h1>Submit</h1>
+	<div class="bottom-right-content">
+		<h1>{error}</h1>
+		<div class="submit-button" on:click={submitButton}>
+			<Icon icon="ic:baseline-send" width={30} height={30} />
+			<h1>Submit</h1>
+		</div>
 	</div>
 </main>
 
@@ -86,14 +96,31 @@
 		white-space: pre;
 	}
 
-	.submit-button {
+	.bottom-right-content {
 		position: absolute;
+		width: 250px;
 		bottom: 20px;
 		right: 20px;
+
+		display: flex;
+		flex-direction: column;
+		align-items: end;
+	}
+	.bottom-right-content > h1 {
+		flex: 1;
+		margin-bottom: 10px;
+
+		color: hsl(0deg 70% 60%);
+		font-size: 22px;
+		text-align: end;
+	}
+	.submit-button {
+		width: 186px;
 		padding: 10px 20px;
 
 		background-color: hsl(220deg 60% 45%);
 		border-radius: 100px;
+		box-sizing: border-box;
 
 		display: flex;
 		align-items: center;

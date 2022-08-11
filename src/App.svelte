@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from "svelte";
+	import { fade } from "svelte/transition";
 	import type { Bowlers, Pins } from "./types";
 	import Intro from "./UserScreen/Intro.svelte";
 	import UserScreen from "./UserScreen/UserScreen.svelte";
@@ -177,5 +178,32 @@
 		{currentBowler}
 		{currentFrame} />
 {:else}
-	<main />
+	<main class="center" style="flex-direction: column;">
+		<h1 class="trinityText">Trinity Bowling Software</h1>
+		<h1 class="keybind">Press <span>T</span> to enter TV mode</h1>
+		<h1 class="keybind">Press <span>U</span> to enter User mode</h1>
+	</main>
 {/if}
+
+<style>
+	.trinityText {
+		margin-bottom: 20px;
+
+		color: hsl(220deg 80% 70%);
+	}
+	@supports (-webkit-text-fill-color: transparent) and (-webkit-background-clip: text) {
+		.trinityText {
+			background: -webkit-linear-gradient(-45deg, hsl(220deg 80% 80%), hsl(220deg 80% 60%));
+			background-clip: text;
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+		}
+	}
+	.keybind {
+		color: #fffd;
+		font-size: 26px;
+	}
+	.keybind > span {
+		color: hsl(0deg 70% 80%);
+	}
+</style>
