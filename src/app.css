@@ -6,6 +6,7 @@ main {
 	left: 0;
 
 	background-color: #1B1C1D;
+	box-sizing: border-box;
 	overflow: hidden;
 }
 

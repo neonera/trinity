@@ -3,6 +3,7 @@
 	import type { Bowlers, Pins } from "../types";
 	import { calculateFrames, type CalcFrames } from "../smallFunctions";
 	import Frame from "../lib/Frame.svelte";
+	import DotPins from "../lib/DotPins.svelte";
 
 	export let bowlers: Bowlers;
 	export let pins: Pins;
@@ -26,78 +27,18 @@
 		</div>
 	</div>
 	<div class="frames">
-		{#each calc_frames.values as score, i}
-			<Frame frame={bowlers[currentBowler].frames[i]} {currentFrame} {score} frameNumber={i + 1} />
-		{/each}
-		{#each [...Array(11 - calc_frames.values.length).keys()] as i}
+		{#each [...Array(11).keys()] as i}
 			<Frame
-				frame={[]}
-				score={i + calc_frames.values.length + 1 === 11
+				frame={bowlers[currentBowler].frames[i] ?? []}
+				score={i + 1 === 11
 					? calc_frames.values.reduce((acc, val) => (val && val > acc ? val : acc), 0)
-					: null}
+					: calc_frames.values[i] ?? null}
 				{currentFrame}
-				frameNumber={i + calc_frames.values.length + 1} />
+				frameNumber={i + 1} />
 		{/each}
 	</div>
 	<div class="pins-background">
-		<div class="pins">
-			{#if type === 10}
-				<div style="display: flex;">
-					<div class="pin" style="background-color: {pins.includes(0) ? 'white' : '#fff5'};" />
-					<div class="pin" style="background-color: {pins.includes(1) ? 'white' : '#fff5'};" />
-					<div class="pin" style="background-color: {pins.includes(2) ? 'white' : '#fff5'};" />
-					<div class="pin" style="background-color: {pins.includes(3) ? 'white' : '#fff5'};" />
-				</div>
-				<div style="display: flex;">
-					<div class="pin" style="background-color: {pins.includes(4) ? 'white' : '#fff5'};" />
-					<div class="pin" style="background-color: {pins.includes(5) ? 'white' : '#fff5'};" />
-					<div class="pin" style="background-color: {pins.includes(6) ? 'white' : '#fff5'};" />
-				</div>
-				<div style="display: flex;">
-					<div class="pin" style="background-color: {pins.includes(7) ? 'white' : '#fff5'};" />
-					<div class="pin" style="background-color: {pins.includes(8) ? 'white' : '#fff5'};" />
-				</div>
-				<div style="display: flex;">
-					<div class="pin" style="background-color: {pins.includes(9) ? 'white' : '#fff5'};" />
-				</div>
-			{:else if type === 9}
-				<div style="display: flex;">
-					<div class="pin pin9" style="background-color: {pins.includes(0) ? 'white' : '#fff5'};" />
-				</div>
-				<div style="display: flex;">
-					<div class="pin pin9" style="background-color: {pins.includes(1) ? 'white' : '#fff5'};" />
-					<div class="pin pin9" style="background-color: {pins.includes(2) ? 'white' : '#fff5'};" />
-				</div>
-				<div style="display: flex;">
-					<div class="pin pin9" style="background-color: {pins.includes(3) ? 'white' : '#fff5'};" />
-					<div class="pin pin9" style="background-color: {pins.includes(4) ? '#f88' : '#f885'};" />
-					<div class="pin pin9" style="background-color: {pins.includes(5) ? 'white' : '#fff5'};" />
-				</div>
-				<div style="display: flex;">
-					<div class="pin pin9" style="background-color: {pins.includes(6) ? 'white' : '#fff5'};" />
-					<div class="pin pin9" style="background-color: {pins.includes(7) ? 'white' : '#fff5'};" />
-				</div>
-				<div style="display: flex;">
-					<div class="pin pin9" style="background-color: {pins.includes(8) ? 'white' : '#fff5'};" />
-				</div>
-			{:else if type === 5}
-				<div style="display: flex;">
-					<div class="pin pin5" style="background-color: {pins.includes(0) ? 'white' : '#fff5'};" />
-					<div class="pin pin5" style="background-color: transparent;" />
-					<div class="pin pin5" style="background-color: transparent;" />
-					<div class="pin pin5" style="background-color: transparent;" />
-					<div class="pin pin5" style="background-color: {pins.includes(1) ? 'white' : '#fff5'};" />
-				</div>
-				<div style="display: flex;">
-					<div class="pin pin5" style="background-color: {pins.includes(2) ? 'white' : '#fff5'};" />
-					<div class="pin pin5" style="background-color: transparent;" />
-					<div class="pin pin5" style="background-color: {pins.includes(3) ? 'white' : '#fff5'};" />
-				</div>
-				<div style="display: flex;">
-					<div class="pin pin5" style="background-color: {pins.includes(4) ? 'white' : '#fff5'};" />
-				</div>
-			{/if}
-		</div>
+		<DotPins {pins} {type} />
 	</div>
 </div>
 
@@ -116,8 +57,6 @@
 	.lane-number {
 		width: 100px;
 		height: 100px;
-		top: 0;
-		left: 0;
 		margin-bottom: 10px;
 
 		background-color: #404244;
@@ -176,31 +115,5 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-	}
-	.pins {
-		width: 80px;
-		height: 80px;
-
-		background-color: #28282a;
-		border-radius: 10px;
-
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
-	.pin {
-		width: 10px;
-		height: 10px;
-		margin: 2px 3px;
-
-		background-color: #fff;
-		border-radius: 5px;
-	}
-	.pin9 {
-		margin: 2px 8px;
-	}
-	.pin5 {
-		margin: 4px 2px;
 	}
 </style>

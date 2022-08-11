@@ -70,7 +70,5 @@ export function calculateFrames(frames: Frames): CalcFrames {
 			currentValue += frame[0] + frame[1];
 		}
 	});
-	console.log(values);
-	console.log(currentValue);
 	return { values, currentValue };
 }
