@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { calculateFrames, type CalcFrames } from "../smallFunctions";
-	import type { Bowlers, Pins } from "../types";
+	import type { Bowlers, Frames, Pins } from "../types";
 	import Frame from "../lib/Frame.svelte";
 	import DotPins from "../lib/DotPins.svelte";
+	import Animations from "./Animations.svelte";
 
 	export let bowlingAlleyName: string;
 	export let bowlingAlleyColor: string;
 	export let bowlerAmt: number;
+	export let games: number;
 
 	export let laneNumber: number;
 	export let bowlers: Bowlers;
@@ -15,16 +17,52 @@
 	export let currentFrame: number;
 
 	let calc_frames: { [bowler: string]: CalcFrames } = {};
-	$: Object.keys(bowlers).forEach((bowler) => (calc_frames[bowler] = calculateFrames(bowlers[bowler].frames)));
+	let animate: string | number = "";
+	let updater = 0;
+	let nextAnimate: string = currentBowler;
+	let nextAnimateFrames: Frames = bowlers[currentBowler]?.frames.slice();
+	$: {
+		Object.keys(bowlers).forEach((bowler) => (calc_frames[bowler] = calculateFrames(bowlers[bowler].frames)));
+		const theseFrames = bowlers[nextAnimate]?.frames;
+		if (nextAnimateFrames != theseFrames) {
+			const last_frame = theseFrames.at(-1);
+			if (last_frame) {
+				if (theseFrames.length < 10) {
+					if (last_frame[0] === 10) {
+						animate = "strike";
+					} else if (last_frame[0] + last_frame[1] === 10) {
+						animate = "spare";
+					} else animate = last_frame.at(-1);
+				} else {
+					if (last_frame.at(-1) === 10) {
+						animate = "strike";
+					} else if (last_frame.length > 1 && last_frame.at(-2) + last_frame.at(-1) === 10) {
+						animate = "spare";
+					} else animate = last_frame.at(-1);
+				}
+				updater++;
+			}
+		}
+		if (currentBowler !== nextAnimate) {
+			nextAnimate = currentBowler;
+			nextAnimateFrames = bowlers[currentBowler]?.frames.slice();
+		}
+	}
 </script>
 
 <main style={Object.keys(bowlers).length > 0 ? "padding-top: 100px;" : ""}>
 	<div class="lane-number">
 		<h1>{laneNumber}</h1>
 	</div>
+	{#if currentFrame === 11}
+		<h1 class="end-game-text">Waiting for input on touchscreen...</h1>
+	{/if}
 	{#if Object.keys(bowlers).length === 0}
 		{#if bowlerAmt > 0}
-			<h1 style="position: absolute; top: 20px; right: 20px;">{bowlerAmt} bowlers</h1>
+			<h1 style="position: absolute; top: 20px; right: 20px;">{bowlerAmt} bowler{bowlerAmt === 1 ? "" : "s"}</h1>
+		{/if}
+		{#if games > 0}
+			<h1 style="position: absolute; top: 60px; right: 20px;">{games} game{games === 1 ? "" : "s"}</h1>
 		{/if}
 		<div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
 			<h1 style="font-size: 48px;">
@@ -63,6 +101,7 @@
 		{/each}
 	{/if}
 </main>
+<Animations {animate} {updater} />
 
 <style>
 	.lane-number {
@@ -82,6 +121,15 @@
 	}
 	.lane-number > h1 {
 		font-size: 48px;
+	}
+	.end-game-text {
+		position: absolute;
+		width: 600px;
+		top: 30px;
+		left: calc(50% - 300px);
+
+		color: #fffa;
+		text-align: center;
 	}
 
 	.pins {

@@ -74,13 +74,14 @@
 	{/if}
 	{#if frameNumber < 11}
 		<div class="frame-scores" style="height: 30px;">
-			<div class="frame-score">
+			<div class="frame-score" style={tvSize ? "height: 30px" : ""}>
 				<h1 style={framesTextStyle}>{firstScore}</h1>
 			</div>
 			<div
 				class="frame-score"
 				style={`background: ${hide ? "#2C2D30" : "#404244"}; border-bottom-left-radius: 5px;` +
-					(frameNumber === 10 || showFrameNumber ? "" : "border-top-right-radius: 10px;")}>
+					(frameNumber === 10 || showFrameNumber ? "" : "border-top-right-radius: 10px;") +
+					(tvSize ? "height: 30px" : "")}>
 				<h1 style={framesTextStyle}>
 					{secondScore}
 				</h1>
@@ -89,7 +90,8 @@
 				<div
 					class="frame-score"
 					style={`background: ${hide ? "#2C2D30" : "#404244"};` +
-						(showFrameNumber ? "" : "border-top-right-radius: 10px;")}>
+						(showFrameNumber ? "" : "border-top-right-radius: 10px;") +
+					(tvSize ? "height: 30px" : "")}>
 					<h1 style={framesTextStyle}>
 						{thirdScore}
 					</h1>
@@ -142,6 +144,7 @@
 	}
 	.frame-score {
 		flex: 1;
+		height: 25px;
 		transition: background-color 0.5s;
 
 		display: flex;

@@ -40,10 +40,15 @@
 				third_place.push(bowler);
 			}
 		});
+		if (f_score === 0) {
+			first_place = [];
+			second_place = [];
+			third_place = [];
+		}
 	}
 </script>
 
-<div class="game-progress">
+<div class="page-title">
 	<h1>Game Progress</h1>
 </div>
 {#each Object.keys(bowlers) as bowler, i}
@@ -74,7 +79,7 @@
 {/each}
 
 <style>
-	.game-progress {
+	.page-title {
 		width: fit-content;
 		margin-bottom: 20px;
 		padding: 10px 20px;

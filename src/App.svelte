@@ -8,6 +8,7 @@
 	let bowlingAlleyColor = "hsl(8deg, 75%, 50%)";
 	const laneNumber = 27;
 	let bowlerAmt = 0;
+	let games = 0;
 	let screenType = "";
 
 	// prettier-ignore
@@ -18,14 +19,9 @@
 		LOS34: /*  */ { frames: [[7, 2], [3, 6], [7, 1], [10, 0], [0, 9], [5, 0]] },
 		EVERETT: /**/ { frames: [[1, 0], [0, 2], [3, 1], [4, 0], [0, 5], [4, 0]] },
 	};
-	let pins: Pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+	let pins: Pins = [5];
 	let currentBowler = "AJ";
 	let currentFrame = 7;
-
-	bowlers = {};
-	pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-	currentBowler = "";
-	currentFrame = 1;
 
 	const bowlPins = (pins_knocked: Pins) => {
 		if (currentFrame === 11) return;
@@ -80,8 +76,12 @@
 		names.forEach((name) => {
 			bowlers[name] = { frames: [] };
 		});
+		pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+		currentBowler = "";
+		currentFrame = 1;
 		screenType = "user";
 		currentBowler = names[0];
+		games--;
 	};
 
 	// FOR DEMO PURPOSES:
@@ -111,8 +111,10 @@
 		else if (event.key === "b") {
 			bowlPins(randomPins());
 		} else if (Number.isInteger(+event.key)) {
-			if (bowlerAmt === 0) bowlerAmt = +event.key > 6 ? 6 : +event.key;
-			else bowlPins(randomPins(+event.key));
+			if (bowlerAmt === 0) {
+				bowlerAmt = +event.key > 6 ? 6 : +event.key;
+				games = 2;
+			} else bowlPins(randomPins(+event.key));
 		} else if (event.key === "/") bowlPins(pins);
 		else if (event.key === "i") {
 			if (interval) {
@@ -142,8 +144,9 @@
 	};
 
 	const resetGame = () => {
-		Object.keys(bowlers).forEach((bowler) => (bowlers[bowler] = { frames: [] }));
-		currentBowler = Object.keys(bowlers)[0];
+		bowlers = {};
+		pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+		currentBowler = "";
 		currentFrame = 1;
 	};
 	const advanceGame = () => {
@@ -161,6 +164,7 @@
 		{bowlingAlleyName}
 		{bowlingAlleyColor}
 		{bowlerAmt}
+		{games}
 		{startGame}
 		{laneNumber}
 		{bowlers}
@@ -172,6 +176,7 @@
 		{bowlingAlleyName}
 		{bowlingAlleyColor}
 		{bowlerAmt}
+		{games}
 		{laneNumber}
 		{bowlers}
 		{pins}

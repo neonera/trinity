@@ -6,6 +6,7 @@
 	export let bowlingAlleyName: string;
 	export let bowlingAlleyColor: string;
 	export let bowlerAmt: number;
+	export let games: number;
 	export let startGame: (names: string[]) => any;
 
 	let currentBowler: number = 1;
@@ -54,9 +55,14 @@
 			<h1 class="welcome-text">
 				Welcome to <span style="color: {bowlingAlleyColor};">{bowlingAlleyName}</span>.
 			</h1>
-			{#if bowlerAmt > 0}
-				<h1 class="bowlers-amount">{bowlerAmt} bowlers</h1>
-			{/if}
+			<div style="display: flex; flex-direction: column; align-items: end;">
+				{#if bowlerAmt > 0}
+					<h1 class="bowlers-amount">{bowlerAmt} bowler{bowlerAmt === 1 ? "" : "s"}</h1>
+				{/if}
+				{#if games > 0}
+					<h1 class="bowlers-amount">{games} game{games === 1 ? "" : "s"}</h1>
+				{/if}
+			</div>
 		</div>
 	</div>
 	{#if bowlerAmt === 0}
@@ -85,7 +91,7 @@
 				<h1>
 					{editingBowler > -1
 						? `Editing Bowler ${editingBowler + 1}`
-						: `Bowler ${currentBowler}/${bowlerAmt}`}
+						: `Bowler ${currentBowler} of ${bowlerAmt}`}
 				</h1>
 				<div class="center" style="flex: 1;">
 					<h1 class="current-name" style={!currentName ? "color: #fff8;" : "border-color: #5c5f66;"}>
