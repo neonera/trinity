@@ -111,7 +111,7 @@
 		else if (event.key === "b") {
 			bowlPins(randomPins());
 		} else if (Number.isInteger(+event.key)) {
-			if (bowlerAmt === 0) bowlerAmt = +event.key;
+			if (bowlerAmt === 0) bowlerAmt = +event.key > 6 ? 6 : +event.key;
 			else bowlPins(randomPins(+event.key));
 		} else if (event.key === "/") bowlPins(pins);
 		else if (event.key === "i") {

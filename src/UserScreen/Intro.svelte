@@ -61,7 +61,7 @@
 	</div>
 	{#if bowlerAmt === 0}
 		<div class="center" style="flex: 1; flex-direction: column;">
-			<h1 style="color: #fffd;">Waiting for bowlers...!</h1>
+			<h1>Waiting for bowlers...!</h1>
 			<h1 style="color: #fffa;">Buy games at the Front Desk.</h1>
 		</div>
 	{:else}

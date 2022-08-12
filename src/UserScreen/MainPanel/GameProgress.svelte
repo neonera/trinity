@@ -84,6 +84,7 @@
 	}
 	.name {
 		width: 200px;
+		margin-right: 10px;
 
 		text-overflow: ellipsis;
 		white-space: nowrap;
