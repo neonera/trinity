@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from "svelte";
-	import type { BowlersType, Pins } from "./types";
+	import type { BowlersType, PinsType } from "./types";
 	import UserScreen from "./UserScreen/UserScreen.svelte";
 	import TVScreen from "./TVScreen/TVScreen.svelte";
 
@@ -20,11 +20,11 @@
 		LOS34: /*  */ { frames: [[7, 2], [3, 6], [7, 1], [10, 0], [0, 9], [5, 0]] },
 		EVERETT: /**/ { frames: [[1, 0], [0, 2], [3, 1], [4, 0], [0, 5], [4, 0]] },
 	};
-	let pins: Pins = [5];
+	let pins: PinsType = [5];
 	let currentBowler = "AJ";
 	let currentFrame = 7;
 
-	const bowlPins = (pins_knocked: Pins) => {
+	const bowlPins = (pins_knocked: PinsType) => {
 		if (currentFrame === 11) return;
 
 		const pins_amt = pins_knocked.length;
@@ -94,8 +94,8 @@
 		if (isNaN(amt)) amt = Math.round(Math.random() * (10 - (last_frame.at(-1) ?? 0)));
 		else if (amt > pins.length) amt = pins.length;
 
-		let returned_pins: Pins = [];
-		const possible_pins: Pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+		let returned_pins: PinsType = [];
+		const possible_pins: PinsType = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 		for (let i = 0; i < amt; i++) {
 			let random = 0;
 			while (returned_pins.includes(random)) {
