@@ -1,9 +1,11 @@
 <script lang="ts">
-	import type { Bowlers } from "../../types";
+	import type { BowlersType } from "../../types";
 	import { calculateFrames, hslToHex, type CalcFrames } from "../../smallFunctions";
 	import Progress from "../../lib/Progress.svelte";
 
-	export let bowlers: Bowlers;
+	export let bowlers: BowlersType;
+	export let games: number;
+	export let currentGame: number;
 
 	let calc_frames: { [bowler: string]: CalcFrames } = {};
 	let first_place: string[] = [];
@@ -48,8 +50,11 @@
 	}
 </script>
 
-<div class="page-title">
-	<h1>Game Progress</h1>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+	<div class="page-title">
+		<h1>Game Progress</h1>
+	</div>
+	<h1 style="font-size: 26px; color: #fffa;">Game {currentGame} of {games}</h1>
 </div>
 {#each Object.keys(bowlers) as bowler, i}
 	<div style="display: flex; align-items: center; margin-top: 10px;">
@@ -81,7 +86,6 @@
 <style>
 	.page-title {
 		width: fit-content;
-		margin-bottom: 20px;
 		padding: 10px 20px;
 
 		border-radius: 40px;

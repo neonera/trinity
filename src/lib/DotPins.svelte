@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Pins } from "../types";
+	import type { PinsType } from "../types";
 
-	export let pins: Pins;
+	export let pins: PinsType;
 	export let type: 10 | 9 | 5 = 10;
 </script>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { calculateFrames, type CalcFrames } from "../smallFunctions";
-	import type { Bowlers, Frames, Pins } from "../types";
+	import type { BowlersType, FramesType, PinsType } from "../types";
 	import Frame from "../lib/Frame.svelte";
 	import DotPins from "../lib/DotPins.svelte";
 	import Animations from "./Animations.svelte";
@@ -11,8 +11,8 @@
 	export let games: number;
 
 	export let laneNumber: number;
-	export let bowlers: Bowlers;
-	export let pins: Pins;
+	export let bowlers: BowlersType;
+	export let pins: PinsType;
 	export let currentBowler: string;
 	export let currentFrame: number;
 
@@ -20,7 +20,7 @@
 	let animate: string | number = "";
 	let updater = 0;
 	let nextAnimate: string = currentBowler;
-	let nextAnimateFrames: Frames = bowlers[currentBowler]?.frames.slice();
+	let nextAnimateFrames: FramesType = bowlers[currentBowler]?.frames.slice();
 	$: {
 		Object.keys(bowlers).forEach((bowler) => (calc_frames[bowler] = calculateFrames(bowlers[bowler].frames)));
 		const theseFrames = bowlers[nextAnimate]?.frames;
@@ -36,7 +36,11 @@
 				} else {
 					if (last_frame.at(-1) === 10) {
 						animate = "strike";
-					} else if (last_frame.length > 1 && last_frame.at(-2) + last_frame.at(-1) === 10) {
+					} else if (
+						last_frame.length > 1 &&
+						last_frame[0] < 10 &&
+						last_frame.at(-2) + last_frame.at(-1) === 10
+					) {
 						animate = "spare";
 					} else animate = last_frame.at(-1);
 				}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from "svelte";
-	import type { Bowlers, Pins } from "./types";
+	import type { BowlersType, Pins } from "./types";
 	import UserScreen from "./UserScreen/UserScreen.svelte";
 	import TVScreen from "./TVScreen/TVScreen.svelte";
 
@@ -9,10 +9,11 @@
 	const laneNumber = 27;
 	let bowlerAmt = 0;
 	let games = 0;
+	let currentGame = 0;
 	let screenType = "";
 
 	// prettier-ignore
-	let bowlers: Bowlers = {
+	let bowlers: BowlersType = {
 		DOM: /*    */ { frames: [[7, 0], [3, 4], [7, 1], [10, 0], [0, 7], [5, 0], [5, 1]] },
 		JAYDEN: /* */ { frames: [[9, 0], [3, 4], [7, 1], [10, 0], [1, 9], [4, 1], [10, 0]] },
 		AJ: /*     */ { frames: [[7, 0], [3, 4], [7, 1], [10, 0], [0, 9], [5, 0], [9]] },
@@ -81,7 +82,7 @@
 		currentFrame = 1;
 		screenType = "user";
 		currentBowler = names[0];
-		games--;
+		currentGame++;
 	};
 
 	// FOR DEMO PURPOSES:
@@ -148,14 +149,18 @@
 		pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 		currentBowler = "";
 		currentFrame = 1;
+		games = 0;
+		currentGame = 0;
 	};
 	const advanceGame = () => {
 		bowlPins(randomPins());
 		if (currentFrame === 11) clearInterval(interval);
 	};
 	let interval;
-	// resetGame();
+	resetGame();
 	onDestroy(() => clearInterval(interval));
+
+	$: if (bowlerAmt === 0) resetGame();
 </script>
 
 <svelte:window on:keypress={keyPress} />
@@ -165,6 +170,7 @@
 		{bowlingAlleyColor}
 		{bowlerAmt}
 		{games}
+		{currentGame}
 		{startGame}
 		{laneNumber}
 		{bowlers}

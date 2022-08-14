@@ -1,13 +1,13 @@
 <script lang="ts">
 	import Icon from "@iconify/svelte";
-	import type { Bowlers, Pins } from "../types";
+	import type { BowlersType, PinsType } from "../types";
 	import { calculateFrames, type CalcFrames } from "../smallFunctions";
 	import Frame from "../lib/Frame.svelte";
 	import DotPins from "../lib/DotPins.svelte";
 
 	export let laneNumber: number;
-	export let bowlers: Bowlers;
-	export let pins: Pins;
+	export let bowlers: BowlersType;
+	export let pins: PinsType;
 	export let type: 10 | 9 | 5 = 10;
 	export let currentBowler: string;
 	export let currentFrame: number;

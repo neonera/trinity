@@ -1,4 +1,4 @@
-import type { Frames } from "./types";
+import type { FramesType } from "./types";
 
 export function hslToHex(h: number, s: number, l: number): string {
 	l /= 100;
@@ -14,7 +14,7 @@ export function hslToHex(h: number, s: number, l: number): string {
 }
 
 export type CalcFrames = { values: (number | null)[]; currentValue: number };
-export function calculateFrames(frames: Frames): CalcFrames {
+export function calculateFrames(frames: FramesType): CalcFrames {
 	let values: CalcFrames["values"] = [];
 	let currentValue: number = 0;
 	frames.forEach((frame, i) => {

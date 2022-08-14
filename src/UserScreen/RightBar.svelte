@@ -9,7 +9,7 @@
 		themes: { icon: "mdi:palette", title: "Themes" },
 		chat: { icon: "mdi:forum", title: "Lane Chat" },
 		bowlers: { icon: "ic:baseline-people", title: "Bowlers" },
-		scores: { icon: "ic:baseline-scoreboard", title: "Scores" },
+		stats: { icon: "ic:baseline-bar-chart", title: "Stats" },
 	};
 </script>
 
@@ -63,8 +63,8 @@
 	.bowlers:active {
 		background-color: hsl(250deg 20% 30%);
 	}
-	.scores-selected,
-	.scores:active {
+	.stats-selected,
+	.stats:active {
 		background-color: hsl(30deg 20% 30%);
 	}
 </style>

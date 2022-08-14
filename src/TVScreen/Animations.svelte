@@ -22,7 +22,8 @@
 	const animationComponents: { [key: string | number]: any } = standard;
 </script>
 
-<div class="animations" style={finished ? "display: none;" : `opacity: ${1 - Math.abs($opacity - 1)};`}>
+<!-- Turned off because they are annoying -->
+<div class="animations" style={finished || true ? "display: none;" : `opacity: ${1 - Math.abs($opacity - 1)};`}>
 	{#if !finished}
 		<svelte:component this={animationComponents[animate]} />
 	{/if}

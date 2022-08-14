@@ -1,23 +1,27 @@
 <script lang="ts">
 	import { fade } from "svelte/transition";
 	import Icon from "@iconify/svelte";
-	import type { Bowlers, Pins } from "../types";
+	import type { BowlersType, PinsType } from "../types";
 	import { calculateFrames } from "../smallFunctions";
 	import Intro from "./Intro.svelte";
 	import TopBar from "./TopBar.svelte";
 	import RightBar from "./RightBar.svelte";
 	import GameProgress from "./MainPanel/GameProgress.svelte";
 	import Themes from "./MainPanel/Themes.svelte";
+	import LaneChat from "./MainPanel/LaneChat.svelte";
+	import Bowlers from "./MainPanel/Bowlers.svelte";
+	import Stats from "./MainPanel/Stats.svelte";
 
 	export let bowlingAlleyName: string;
 	export let bowlingAlleyColor: string;
 	export let bowlerAmt: number;
 	export let games: number;
+	export let currentGame: number;
 	export let startGame: (names: string[]) => any;
 
 	export let laneNumber: number;
-	export let bowlers: Bowlers;
-	export let pins: Pins;
+	export let bowlers: BowlersType;
+	export let pins: PinsType;
 	export let currentBowler: string;
 	export let currentFrame: number;
 
@@ -41,8 +45,6 @@
 						? bowlersRanks[sortedScores[i - 1]]
 						: bowlersRanks[sortedScores[i - 1]] + 1;
 		});
-		console.log(sortedScores);
-		console.log(bowlersRanks);
 	}
 </script>
 
@@ -54,9 +56,15 @@
 		<div style="display: flex; flex: 1;">
 			<div class="main-panel">
 				{#if mainPanelPage === "progress"}
-					<GameProgress {bowlers} />
+					<GameProgress {bowlers} {games} {currentGame} />
 				{:else if mainPanelPage === "themes"}
 					<Themes />
+				{:else if mainPanelPage === "chat"}
+					<LaneChat />
+				{:else if mainPanelPage === "bowlers"}
+					<Bowlers />
+				{:else if mainPanelPage === "stats"}
+					<Stats />
 				{/if}
 			</div>
 			<RightBar {mainPanelPage} {setPage} />
@@ -76,7 +84,7 @@
 					<h1>{bowlersScores[bowler]}</h1>
 				</div>
 			{/each}
-			{#if games === 0}
+			{#if games === currentGame}
 				<h1 class="contact-front-desk">Contact the Front Desk to buy more games.</h1>
 			{:else}
 				<div class="start-game" on:click={() => startGame(Object.keys(bowlers))}>

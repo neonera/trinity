@@ -1,7 +1,7 @@
-export type Frames = ([number] | [number, number] | [number, number, number])[];
+export type FramesType = ([number] | [number, number] | [number, number, number])[];
 
-export type Bowlers = {
-	[name: string]: { frames: Frames };
+export type BowlersType = {
+	[name: string]: { frames: FramesType };
 };
 
-export type Pins = number[];
+export type PinsType = number[];
