@@ -6,7 +6,7 @@
 
 	let bowlingAlleyName = "Lava Lanes";
 	let bowlingAlleyColor = "hsl(8deg, 75%, 50%)";
-	const laneNumber = 27;
+	let laneNumber = 27;
 	let bowlerAmt = 0;
 	let games = 0;
 	let currentGame = 0;
@@ -107,9 +107,16 @@
 	};
 
 	const keyPress = (event: KeyboardEvent) => {
-		if (event.key === "u") screenType = "user";
-		else if (event.key === "t") screenType = "tv";
-		else if (event.key === "b") {
+		if (event.key === "u") {
+			screenType = "user";
+			startSocket(27, "user");
+		} else if (event.key === "t") {
+			screenType = "tv";
+			startSocket(27, "tv");
+		} else if (event.key === "a") {
+			screenType = "admin";
+			startSocket(27, "admin", "test");
+		} else if (event.key === "b") {
 			bowlPins(randomPins());
 		} else if (Number.isInteger(+event.key)) {
 			if (bowlerAmt === 0) {
@@ -161,6 +168,50 @@
 	onDestroy(() => clearInterval(interval));
 
 	$: if (bowlerAmt === 0) resetGame();
+
+	let socket;
+	const startSocket = (lane: number, type: "tv" | "user" | "admin", pass?: string) => {
+		socket = new WebSocket("ws://localhost:2053");
+
+		socket.onopen = (event: Event) => {
+			// socket.send(JSON.stringify({ command: "initialize", lane, type, pass }));
+			socket_functions.initialize(lane, type, pass);
+		};
+
+		socket.onmessage = (event) => {
+			const jsonData = JSON.parse(event.data);
+			console.log("WebSocket received:", jsonData);
+
+			if (jsonData.command === "initialize") {
+				if (jsonData.response === true) {
+					laneNumber = jsonData.lane;
+					screenType = jsonData.type;
+					if (jsonData.type === "admin") {
+						// For testing purposes
+						socket_functions.create_lanes([27]);
+					}
+				}
+			}
+		};
+
+		socket.onclose = (event) => {
+			console.log("WebSocket closed");
+		};
+	};
+
+	const send_websocket_message = (jsonData: { command: string; [prop: string]: any }) => {
+		const jsonString = JSON.stringify(jsonData);
+		console.log("WebSocket sending: " + jsonString);
+		socket?.send(jsonString);
+	};
+
+	const socket_functions = {
+		initialize: (lane: number, type: string, pass?: string) =>
+			send_websocket_message({ command: "initialize", lane, type, pass }),
+
+		// Admin
+		create_lanes: (lanes: number[]) => send_websocket_message({ command: "create_lanes", lanes }),
+	};
 </script>
 
 <svelte:window on:keypress={keyPress} />
