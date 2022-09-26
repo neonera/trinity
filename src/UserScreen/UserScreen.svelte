@@ -15,7 +15,7 @@
 	export let bowlingAlleyName: string;
 	export let bowlingAlleyColor: string;
 	export let bowlerAmt: number;
-	export let games: number;
+	export let gamesAmt: number;
 	export let currentGame: number;
 	export let startGame: (names: string[]) => any;
 
@@ -49,14 +49,14 @@
 </script>
 
 {#if Object.keys(bowlers).length === 0}
-	<Intro {laneNumber} {bowlingAlleyName} {bowlingAlleyColor} {bowlerAmt} {games} {startGame} />
+	<Intro {laneNumber} {bowlingAlleyName} {bowlingAlleyColor} {bowlerAmt} {gamesAmt} {startGame} />
 {:else}
 	<main style="display: flex; flex-direction: column; ">
 		<TopBar {laneNumber} {bowlers} {pins} {currentBowler} {currentFrame} />
 		<div style="display: flex; flex: 1;">
 			<div class="main-panel">
 				{#if mainPanelPage === "progress"}
-					<GameProgress {bowlers} {games} {currentGame} />
+					<GameProgress {bowlers} {gamesAmt} {currentGame} />
 				{:else if mainPanelPage === "themes"}
 					<Themes />
 				{:else if mainPanelPage === "chat"}
@@ -84,7 +84,7 @@
 					<h1>{bowlersScores[bowler]}</h1>
 				</div>
 			{/each}
-			{#if games === currentGame}
+			{#if gamesAmt === currentGame}
 				<h1 class="contact-front-desk">Contact the Front Desk to buy more games.</h1>
 			{:else}
 				<div class="start-game" on:click={() => startGame(Object.keys(bowlers))}>

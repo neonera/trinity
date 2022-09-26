@@ -4,7 +4,7 @@
 	import Progress from "../../lib/Progress.svelte";
 
 	export let bowlers: BowlersType;
-	export let games: number;
+	export let gamesAmt: number;
 	export let currentGame: number;
 
 	let calc_frames: { [bowler: string]: CalcFrames } = {};
@@ -54,7 +54,7 @@
 	<div class="page-title">
 		<h1>Game Progress</h1>
 	</div>
-	<h1 style="font-size: 26px; color: #fffa;">Game {currentGame} of {games}</h1>
+	<h1 style="font-size: 26px; color: #fffa;">Game {currentGame} of {gamesAmt}</h1>
 </div>
 {#each Object.keys(bowlers) as bowler, i}
 	<div style="display: flex; align-items: center; margin-top: 10px;">

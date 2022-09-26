@@ -8,7 +8,7 @@
 	export let bowlingAlleyName: string;
 	export let bowlingAlleyColor: string;
 	export let bowlerAmt: number;
-	export let games: number;
+	export let gamesAmt: number;
 
 	export let laneNumber: number;
 	export let bowlers: BowlersType;
@@ -65,8 +65,8 @@
 		{#if bowlerAmt > 0}
 			<h1 style="position: absolute; top: 20px; right: 20px;">{bowlerAmt} bowler{bowlerAmt === 1 ? "" : "s"}</h1>
 		{/if}
-		{#if games > 0}
-			<h1 style="position: absolute; top: 60px; right: 20px;">{games} game{games === 1 ? "" : "s"}</h1>
+		{#if gamesAmt > 0}
+			<h1 style="position: absolute; top: 60px; right: 20px;">{gamesAmt} game{gamesAmt === 1 ? "" : "s"}</h1>
 		{/if}
 		<div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
 			<h1 style="font-size: 48px;">

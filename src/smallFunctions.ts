@@ -1,5 +1,6 @@
 import type { FramesType } from "./types";
 
+// This function was grabbed from Stack Overflow :/
 export function hslToHex(h: number, s: number, l: number): string {
 	l /= 100;
 	const a = (s * Math.min(l, 1 - l)) / 100;

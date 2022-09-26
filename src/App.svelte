@@ -3,15 +3,17 @@
 	import type { BowlersType, PinsType } from "./types";
 	import UserScreen from "./UserScreen/UserScreen.svelte";
 	import TVScreen from "./TVScreen/TVScreen.svelte";
+	import AdminScreen from "./AdminScreen/AdminScreen.svelte";
 
 	let bowlingAlleyName = "Lava Lanes";
 	let bowlingAlleyColor = "hsl(8deg, 75%, 50%)";
 	let laneNumber = 27;
 	let bowlerAmt = 0;
-	let games = 0;
+	let gamesAmt = 0;
 	let currentGame = 0;
 	let screenType = "";
 
+	let past_games: BowlersType[] = [];
 	// prettier-ignore
 	let bowlers: BowlersType = {
 		DOM: /*    */ { frames: [[7, 0], [3, 4], [7, 1], [10, 0], [0, 7], [5, 0], [5, 1]] },
@@ -74,36 +76,15 @@
 	};
 
 	const startGame = (names: string[]) => {
-		names.forEach((name) => {
-			bowlers[name] = { frames: [] };
-		});
-		pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-		currentBowler = "";
-		currentFrame = 1;
-		screenType = "user";
-		currentBowler = names[0];
-		currentGame++;
-	};
-
-	// FOR DEMO PURPOSES:
-
-	const randomPins = (amt?: number) => {
-		// Only for testing purposes
-		const frames = bowlers[currentBowler].frames;
-		const last_frame = frames.at(-1) ?? [];
-		if (isNaN(amt)) amt = Math.round(Math.random() * (10 - (last_frame.at(-1) ?? 0)));
-		else if (amt > pins.length) amt = pins.length;
-
-		let returned_pins: PinsType = [];
-		const possible_pins: PinsType = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-		for (let i = 0; i < amt; i++) {
-			let random = 0;
-			while (returned_pins.includes(random)) {
-				random = possible_pins[Math.floor(Math.random() * possible_pins.length)];
-			}
-			returned_pins.push(random);
-		}
-		return returned_pins;
+		// if (currentGame > 0) past_games.push(bowlers);
+		// names.forEach((name) => {
+		// 	bowlers[name] = { frames: [] };
+		// });
+		// pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+		// currentFrame = 1;
+		// currentBowler = names[0];
+		// currentGame++;
+		socket_functions.start_game(names);
 	};
 
 	const keyPress = (event: KeyboardEvent) => {
@@ -116,31 +97,6 @@
 		} else if (event.key === "a") {
 			screenType = "admin";
 			startSocket(27, "admin", "test");
-		} else if (event.key === "b") {
-			bowlPins(randomPins());
-		} else if (Number.isInteger(+event.key)) {
-			if (bowlerAmt === 0) {
-				bowlerAmt = +event.key > 6 ? 6 : +event.key;
-				games = 2;
-			} else bowlPins(randomPins(+event.key));
-		} else if (event.key === "/") bowlPins(pins);
-		else if (event.key === "i") {
-			if (interval) {
-				clearInterval(interval);
-				interval = null;
-			} else {
-				const bowler_names = Object.keys(bowlers);
-				const next_index = bowler_names.indexOf(currentBowler) - 1;
-				const back_to_start = next_index < 0;
-				const lastBowler = bowler_names[back_to_start ? bowler_names.length - 1 : next_index];
-				const ms_frame = bowlers[lastBowler].frames.at(-1) ?? [];
-
-				const part1 = ms_frame[0]?.toString() ?? "0";
-				const part2 = ms_frame[1]?.toString() ?? "5";
-				const ms = +(part1 + part2) * 100;
-				console.log(ms);
-				interval = setInterval(advanceGame, ms);
-			}
 		} else if (event.key === "n") {
 			const alley_names = ["Lava Lanes", "Roxy Ann Lanes", "Caveman Bowl"];
 			const alley_colors = ["hsl(8deg, 75%, 50%)", "hsl(355deg, 60%, 50%)", "hsl(180deg, 60%, 55%)"];
@@ -156,25 +112,19 @@
 		pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 		currentBowler = "";
 		currentFrame = 1;
-		games = 0;
+		gamesAmt = 0;
 		currentGame = 0;
 	};
-	const advanceGame = () => {
-		bowlPins(randomPins());
-		if (currentFrame === 11) clearInterval(interval);
-	};
-	let interval;
 	resetGame();
-	onDestroy(() => clearInterval(interval));
 
 	$: if (bowlerAmt === 0) resetGame();
 
 	let socket;
 	const startSocket = (lane: number, type: "tv" | "user" | "admin", pass?: string) => {
+		socket?.close?.();
 		socket = new WebSocket("ws://localhost:2053");
 
 		socket.onopen = (event: Event) => {
-			// socket.send(JSON.stringify({ command: "initialize", lane, type, pass }));
 			socket_functions.initialize(lane, type, pass);
 		};
 
@@ -186,10 +136,35 @@
 				if (jsonData.response === true) {
 					laneNumber = jsonData.lane;
 					screenType = jsonData.type;
+
+					bowlerAmt = jsonData.bowlerAmt;
+					gamesAmt = jsonData.gamesAmt;
+					currentBowler = jsonData.currentBowler;
+					currentFrame = jsonData.currentFrame;
+					currentGame = jsonData.currentGame;
+
+					bowlers = jsonData.bowlers;
+					pins = jsonData.pins;
+
 					if (jsonData.type === "admin") {
 						// For testing purposes
-						socket_functions.create_lanes([27]);
+						// socket_functions.create_lanes([27]);
 					}
+				}
+			} else if (jsonData.command === "start_game") {
+				if (jsonData.response === true) {
+					if (currentGame > 0) past_games.push(bowlers);
+					jsonData.names.forEach((name) => {
+						bowlers[name] = { frames: [] };
+					});
+					pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+					currentFrame = 1;
+					currentBowler = jsonData.names[0];
+					currentGame++;
+				}
+			} else if (jsonData.command === "bowl_pins") {
+				if (jsonData.response === true) {
+					bowlPins(jsonData.pins_knocked);
 				}
 			}
 		};
@@ -208,6 +183,7 @@
 	const socket_functions = {
 		initialize: (lane: number, type: string, pass?: string) =>
 			send_websocket_message({ command: "initialize", lane, type, pass }),
+		start_game: (names: string[]) => send_websocket_message({ command: "start_game", names }),
 
 		// Admin
 		create_lanes: (lanes: number[]) => send_websocket_message({ command: "create_lanes", lanes }),
@@ -220,7 +196,7 @@
 		{bowlingAlleyName}
 		{bowlingAlleyColor}
 		{bowlerAmt}
-		{games}
+		{gamesAmt}
 		{currentGame}
 		{startGame}
 		{laneNumber}
@@ -233,28 +209,31 @@
 		{bowlingAlleyName}
 		{bowlingAlleyColor}
 		{bowlerAmt}
-		{games}
+		{gamesAmt}
 		{laneNumber}
 		{bowlers}
 		{pins}
 		{currentBowler}
 		{currentFrame} />
+{:else if screenType === "admin"}
+	<AdminScreen {bowlingAlleyName} {bowlingAlleyColor} />
 {:else}
 	<main class="center" style="flex-direction: column;">
 		<h1 class="trinityText">Trinity Bowling Software</h1>
 		<h1 class="keybind">Press <span>T</span> to enter TV mode</h1>
 		<h1 class="keybind">Press <span>U</span> to enter User mode</h1>
+		<h1 class="keybind">Press <span>A</span> to enter Admin mode</h1>
 	</main>
 {/if}
 
 <style>
-	.trinityText {
+	:global(.trinityText) {
 		margin-bottom: 20px;
 
 		color: hsl(220deg 80% 70%);
 	}
 	@supports (-webkit-text-fill-color: transparent) and (-webkit-background-clip: text) {
-		.trinityText {
+		:global(.trinityText) {
 			background: -webkit-linear-gradient(-45deg, hsl(220deg 80% 80%), hsl(220deg 80% 60%));
 			background-clip: text;
 			-webkit-background-clip: text;

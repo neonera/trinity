@@ -6,7 +6,7 @@
 	export let bowlingAlleyName: string;
 	export let bowlingAlleyColor: string;
 	export let bowlerAmt: number;
-	export let games: number;
+	export let gamesAmt: number;
 	export let startGame: (names: string[]) => any;
 
 	let currentBowler: number = 1;
@@ -59,8 +59,8 @@
 				{#if bowlerAmt > 0}
 					<h1 class="bowlers-amount">{bowlerAmt} bowler{bowlerAmt === 1 ? "" : "s"}</h1>
 				{/if}
-				{#if games > 0}
-					<h1 class="bowlers-amount">{games} game{games === 1 ? "" : "s"}</h1>
+				{#if gamesAmt > 0}
+					<h1 class="bowlers-amount">{gamesAmt} game{gamesAmt === 1 ? "" : "s"}</h1>
 				{/if}
 			</div>
 		</div>
