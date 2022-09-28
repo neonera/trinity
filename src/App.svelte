@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from "svelte";
-	import type { BowlersType, PinsType } from "./types";
+	import type { BowlersType, Lanes, PinsType } from "./types";
 	import UserScreen from "./UserScreen/UserScreen.svelte";
 	import TVScreen from "./TVScreen/TVScreen.svelte";
 	import AdminScreen from "./AdminScreen/AdminScreen.svelte";
@@ -13,18 +13,15 @@
 	let currentGame = 0;
 	let screenType = "";
 
+	// Admin only
+	let lanes: Lanes = {};
+
+	// TV/User
 	let past_games: BowlersType[] = [];
-	// prettier-ignore
-	let bowlers: BowlersType = {
-		DOM: /*    */ { frames: [[7, 0], [3, 4], [7, 1], [10, 0], [0, 7], [5, 0], [5, 1]] },
-		JAYDEN: /* */ { frames: [[9, 0], [3, 4], [7, 1], [10, 0], [1, 9], [4, 1], [10, 0]] },
-		AJ: /*     */ { frames: [[7, 0], [3, 4], [7, 1], [10, 0], [0, 9], [5, 0], [9]] },
-		LOS34: /*  */ { frames: [[7, 2], [3, 6], [7, 1], [10, 0], [0, 9], [5, 0]] },
-		EVERETT: /**/ { frames: [[1, 0], [0, 2], [3, 1], [4, 0], [0, 5], [4, 0]] },
-	};
-	let pins: PinsType = [5];
-	let currentBowler = "AJ";
-	let currentFrame = 7;
+	let bowlers: BowlersType = {};
+	let pins: PinsType = [];
+	let currentBowler = "";
+	let currentFrame = 0;
 
 	const bowlPins = (pins_knocked: PinsType) => {
 		if (currentFrame === 11) return;
@@ -90,13 +87,13 @@
 	const keyPress = (event: KeyboardEvent) => {
 		if (event.key === "u") {
 			screenType = "user";
-			startSocket(27, "user");
+			startSocket(4, "user");
 		} else if (event.key === "t") {
 			screenType = "tv";
-			startSocket(27, "tv");
+			startSocket(4, "tv");
 		} else if (event.key === "a") {
 			screenType = "admin";
-			startSocket(27, "admin", "test");
+			startSocket(4, "admin", "test");
 		} else if (event.key === "n") {
 			const alley_names = ["Lava Lanes", "Roxy Ann Lanes", "Caveman Bowl"];
 			const alley_colors = ["hsl(8deg, 75%, 50%)", "hsl(355deg, 60%, 50%)", "hsl(180deg, 60%, 55%)"];
@@ -147,25 +144,41 @@
 					pins = jsonData.pins;
 
 					if (jsonData.type === "admin") {
-						// For testing purposes
-						// socket_functions.create_lanes([27]);
+						lanes = jsonData.lanes;
 					}
 				}
 			} else if (jsonData.command === "start_game") {
 				if (jsonData.response === true) {
-					if (currentGame > 0) past_games.push(bowlers);
-					jsonData.names.forEach((name) => {
-						bowlers[name] = { frames: [] };
-					});
-					pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-					currentFrame = 1;
-					currentBowler = jsonData.names[0];
-					currentGame++;
+					if (screenType === "admin") {
+						if (currentGame > 0) past_games.push(bowlers);
+						jsonData.names.forEach((name) => {
+							bowlers[name] = { frames: [] };
+						});
+						pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+						currentFrame = 1;
+						currentBowler = jsonData.names[0];
+						currentGame++;
+					} else {
+						if (currentGame > 0) past_games.push(bowlers);
+						jsonData.names.forEach((name) => {
+							bowlers[name] = { frames: [] };
+						});
+						pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+						currentFrame = 1;
+						currentBowler = jsonData.names[0];
+						currentGame++;
+					}
 				}
 			} else if (jsonData.command === "bowl_pins") {
 				if (jsonData.response === true) {
 					bowlPins(jsonData.pins_knocked);
 				}
+			}
+
+			// Admin
+
+			else if (jsonData.command === "update_lanes") {
+				lanes = jsonData.lanes;
 			}
 		};
 
@@ -187,6 +200,8 @@
 
 		// Admin
 		create_lanes: (lanes: number[]) => send_websocket_message({ command: "create_lanes", lanes }),
+		set_bowlers: (bowlers: number) => send_websocket_message({ command: "set_bowlers", bowlers }),
+		set_games: (games: number) => send_websocket_message({ command: "set_games", games }),
 	};
 </script>
 
@@ -216,7 +231,7 @@
 		{currentBowler}
 		{currentFrame} />
 {:else if screenType === "admin"}
-	<AdminScreen {bowlingAlleyName} {bowlingAlleyColor} />
+	<AdminScreen {bowlingAlleyName} {bowlingAlleyColor} {lanes} />
 {:else}
 	<main class="center" style="flex-direction: column;">
 		<h1 class="trinityText">Trinity Bowling Software</h1>
