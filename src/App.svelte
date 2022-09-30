@@ -1,3 +1,24 @@
+<script context="module" lang="ts">
+	let socket;
+	const send_websocket_message = (jsonData: { command: string; [prop: string]: any }) => {
+		const jsonString = JSON.stringify(jsonData);
+		console.log("WebSocket sending: " + jsonString);
+		socket?.send(jsonString);
+	};
+
+	export const socket_functions = {
+		initialize: (lane: number, type: string, pass?: string) =>
+			send_websocket_message({ command: "initialize", lane, type, pass }),
+		start_game: (names: string[]) => send_websocket_message({ command: "start_game", names }),
+
+		// Admin
+		create_lanes: (lanes: number[]) => send_websocket_message({ command: "create_lanes", lanes }),
+		set_bowlers: (lane: number, bowlers: number) =>
+			send_websocket_message({ command: "set_bowlers", lane, bowlers }),
+		set_games: (lane: number, games: number) => send_websocket_message({ command: "set_games", lane, games }),
+	};
+</script>
+
 <script lang="ts">
 	import { onMount, onDestroy } from "svelte";
 	import type { BowlersType, Lanes, PinsType } from "./types";
@@ -87,13 +108,13 @@
 	const keyPress = (event: KeyboardEvent) => {
 		if (event.key === "u") {
 			screenType = "user";
-			startSocket(4, "user");
+			startSocket(1, "user");
 		} else if (event.key === "t") {
 			screenType = "tv";
-			startSocket(4, "tv");
+			startSocket(1, "tv");
 		} else if (event.key === "a") {
 			screenType = "admin";
-			startSocket(4, "admin", "test");
+			startSocket(0, "admin", "test");
 		} else if (event.key === "n") {
 			const alley_names = ["Lava Lanes", "Roxy Ann Lanes", "Caveman Bowl"];
 			const alley_colors = ["hsl(8deg, 75%, 50%)", "hsl(355deg, 60%, 50%)", "hsl(180deg, 60%, 55%)"];
@@ -116,7 +137,6 @@
 
 	$: if (bowlerAmt === 0) resetGame();
 
-	let socket;
 	const startSocket = (lane: number, type: "tv" | "user" | "admin", pass?: string) => {
 		socket?.close?.();
 		socket = new WebSocket("ws://localhost:2053");
@@ -147,6 +167,14 @@
 						lanes = jsonData.lanes;
 					}
 				}
+			} else if (jsonData.command === "get_games") {
+				if (jsonData.response === true) {
+					gamesAmt = jsonData.games;
+				}
+			} else if (jsonData.command === "get_bowlers") {
+				if (jsonData.response === true) {
+					bowlerAmt = jsonData.bowlers;
+				}
 			} else if (jsonData.command === "start_game") {
 				if (jsonData.response === true) {
 					if (screenType === "admin") {
@@ -176,32 +204,25 @@
 			}
 
 			// Admin
-
 			else if (jsonData.command === "update_lanes") {
 				lanes = jsonData.lanes;
+			} else if (jsonData.command === "set_games") {
+				if (jsonData.response === true) {
+					lanes[jsonData.lane].data.gamesAmt = jsonData.games;
+				}
+			} else if (jsonData.command === "set_bowlers") {
+				if (jsonData.response === true) {
+					console.log(lanes);
+					console.log(jsonData.lane);
+					console.log(lanes[jsonData.lane]);
+					lanes[jsonData.lane].data.bowlerAmt = jsonData.bowlers;
+				}
 			}
 		};
 
 		socket.onclose = (event) => {
 			console.log("WebSocket closed");
 		};
-	};
-
-	const send_websocket_message = (jsonData: { command: string; [prop: string]: any }) => {
-		const jsonString = JSON.stringify(jsonData);
-		console.log("WebSocket sending: " + jsonString);
-		socket?.send(jsonString);
-	};
-
-	const socket_functions = {
-		initialize: (lane: number, type: string, pass?: string) =>
-			send_websocket_message({ command: "initialize", lane, type, pass }),
-		start_game: (names: string[]) => send_websocket_message({ command: "start_game", names }),
-
-		// Admin
-		create_lanes: (lanes: number[]) => send_websocket_message({ command: "create_lanes", lanes }),
-		set_bowlers: (bowlers: number) => send_websocket_message({ command: "set_bowlers", bowlers }),
-		set_games: (games: number) => send_websocket_message({ command: "set_games", games }),
 	};
 </script>
 

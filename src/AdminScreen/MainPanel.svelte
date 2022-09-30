@@ -3,9 +3,16 @@
 	import type { Lanes, LanesData } from "../types";
 	import Frame from "../lib/Frame.svelte";
 	import DotPins from "../lib/DotPins.svelte";
+	import { socket_functions } from "../App.svelte";
+	import { fade } from "svelte/transition";
 
 	export let lanes: Lanes;
 	export let current_lane: number;
+
+	let creating_session: boolean = false;
+	let edit_bowler: string = "";
+	let creating_session_games: number = 1;
+	let creating_session_bowlers: number = 1;
 
 	let current_data: LanesData;
 	let calc_frames: { [bowler: string]: CalcFrames } = {};
@@ -52,7 +59,7 @@
 		<div class="session">
 			{#if current_data.gamesAmt === 0}
 				<div class="center" style="width: 100%; height: 100%;">
-					<div class="new-session">
+					<div class="new-session" on:click={() => (creating_session = true)}>
 						<h1>New session</h1>
 					</div>
 				</div>
@@ -73,7 +80,12 @@
 					<h1>Bowlers</h1>
 					<div class="bowler-list">
 						{#each Object.keys(current_data.bowlers ?? {}) as bowler}
-							<h1 class:current-bowler={bowler === current_data.currentBowler && current_data.currentFrame < 11}>{bowler}</h1>
+							<h1
+								class:current-bowler={bowler === current_data.currentBowler &&
+									current_data.currentFrame < 11}
+								on:click={() => (edit_bowler = bowler)}>
+								{bowler}
+							</h1>
 						{/each}
 					</div>
 				</div>
@@ -81,19 +93,52 @@
 		</div>
 	{/if}
 </div>
+{#if creating_session}
+	<div
+		class="dialog creating-session"
+		on:click={() => (creating_session = false)}
+		transition:fade={{ duration: 200 }}>
+		<div on:click={(event) => event.stopPropagation()}>
+			<h1>New session</h1>
+			<div class="creating-session-flex">
+				<h1>Games:</h1>
+				<input type="number" class="number-input" bind:value={creating_session_games} min="1" />
+			</div>
+			<div class="creating-session-flex">
+				<h1>Bowlers:</h1>
+				<input type="number" class="number-input" bind:value={creating_session_bowlers} min="1" />
+			</div>
+			<div style="display: flex; align-items: center; justify-content: center; margin-top: 93px;">
+				<div
+					class="new-session"
+					on:click={() => {
+						socket_functions.set_bowlers(current_lane, creating_session_bowlers);
+						socket_functions.set_games(current_lane, creating_session_games);
+						creating_session = false;
+					}}>
+					<h1>Start session</h1>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}
+{#if edit_bowler !== ""}
+	<div class="dialog edit-bowler" on:click={() => (edit_bowler = "")} transition:fade={{ duration: 200 }}>
+		<div on:click={(event) => event.stopPropagation()}>
+			<h1>{edit_bowler}</h1>
+		</div>
+	</div>
+{/if}
 
 <!-- {#each [...Array(11).keys()] as i}
-		<Frame
-			frame={current_data.bowlers[bowler]?.frames[i] ?? []}
-			score={i + 1 === 11
-				? calc_frames[bowler].values.reduce(
-						(acc, val) => (val && val > acc ? val : acc),
-						0
-					)
-				: calc_frames[bowler].values[i] ?? null}
-			currentFrame={current_data.currentFrame}
-			frameNumber={i + 1} />
-	{/each} -->
+	<Frame
+		frame={current_data.bowlers[bowler]?.frames[i] ?? []}
+		score={i + 1 === 11
+			? calc_frames[bowler].values.reduce((acc, val) => (val && val > acc ? val : acc), 0)
+			: calc_frames[bowler].values[i] ?? null}
+		currentFrame={current_data.currentFrame}
+		frameNumber={i + 1} />
+{/each} -->
 <style>
 	.main-panel {
 		flex: 1;
@@ -216,5 +261,60 @@
 	}
 	.current-bowler:active {
 		color: hsl(220deg 80% 65%) !important;
+	}
+
+	.dialog {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		top: 0;
+		left: 0;
+
+		background-color: #0008;
+	}
+	.dialog > div {
+		position: absolute;
+		padding: 20px;
+
+		background-color: #313235;
+		border-radius: 20px;
+		box-sizing: border-box;
+	}
+	.edit-bowler > div {
+		width: 500px;
+		height: 600px;
+		top: calc(50% - 300px);
+		left: calc(50% - 250px);
+	}
+	.creating-session > div {
+		width: 400px;
+		height: 300px;
+		top: calc(50% - 150px);
+		left: calc(50% - 200px);
+	}
+
+	.creating-session-flex {
+		margin-top: 5px;
+
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.creating-session-flex > h1 {
+		font-size: 22px;
+	}
+	.number-input {
+		width: 70px;
+		height: 35px;
+		padding: 10px;
+
+		background-color: #0004;
+		font-size: 18px;
+		font-family: Avenir;
+		font-weight: 600;
+		border: none;
+		outline: none;
+		border-radius: 10px;
+		box-sizing: border-box;
 	}
 </style>

@@ -72,7 +72,7 @@
 	</main>
 {/if}
 {#if currentFrame === 11}
-	<div class="end-game-overlay" in:fade out:fade>
+	<div class="end-game-overlay" transition:fade>
 		<div>
 			<h1 style="margin-bottom: 10px;">Game results:</h1>
 			{#each sortedScores as bowler}
