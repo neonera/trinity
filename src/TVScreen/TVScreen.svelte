@@ -25,7 +25,7 @@
 		Object.keys(bowlers).forEach((bowler) => (calc_frames[bowler] = calculateFrames(bowlers[bowler].frames)));
 		const theseFrames = bowlers[nextAnimate]?.frames;
 		if (nextAnimateFrames != theseFrames) {
-			const last_frame = theseFrames.at(-1);
+			const last_frame = theseFrames?.at(-1);
 			if (last_frame) {
 				if (theseFrames.length < 10) {
 					if (last_frame[0] === 10) {

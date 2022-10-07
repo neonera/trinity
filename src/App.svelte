@@ -16,6 +16,8 @@
 		set_bowlers: (lane: number, bowlers: number) =>
 			send_websocket_message({ command: "set_bowlers", lane, bowlers }),
 		set_games: (lane: number, games: number) => send_websocket_message({ command: "set_games", lane, games }),
+		add_bowler: (lane: number, name: string) => send_websocket_message({ command: "add_bowler", lane, name }),
+		stop_session: (lane: number) => send_websocket_message({ command: "stop_session", lane }),
 	};
 </script>
 
@@ -175,17 +177,23 @@
 				if (jsonData.response === true) {
 					bowlerAmt = jsonData.bowlers;
 				}
+			} else if (jsonData.command === "get_add_bowler") {
+				if (jsonData.response === true) {
+					past_games = jsonData.past_games;
+					bowlers = jsonData.bowlers;
+					bowlerAmt += 1;
+				}
 			} else if (jsonData.command === "start_game") {
 				if (jsonData.response === true) {
 					if (screenType === "admin") {
-						if (currentGame > 0) past_games.push(bowlers);
-						jsonData.names.forEach((name) => {
-							bowlers[name] = { frames: [] };
-						});
-						pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-						currentFrame = 1;
-						currentBowler = jsonData.names[0];
-						currentGame++;
+						// if (currentGame > 0) past_games.push(bowlers);
+						// jsonData.names.forEach((name) => {
+						// 	bowlers[name] = { frames: [] };
+						// });
+						// pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+						// currentFrame = 1;
+						// currentBowler = jsonData.names[0];
+						// currentGame++;
 					} else {
 						if (currentGame > 0) past_games.push(bowlers);
 						jsonData.names.forEach((name) => {
@@ -201,6 +209,28 @@
 				if (jsonData.response === true) {
 					bowlPins(jsonData.pins_knocked);
 				}
+			} else if (jsonData.command === "stop_session") {
+				if (jsonData.response === true) {
+					if (screenType === "admin") {
+						lanes[jsonData.lane].data.bowlerAmt = 0;
+						lanes[jsonData.lane].data.gamesAmt = 0;
+						lanes[jsonData.lane].data.currentBowler = "";
+						lanes[jsonData.lane].data.currentGame = 0;
+						lanes[jsonData.lane].data.currentFrame = 1;
+						lanes[jsonData.lane].data.past_games = [];
+						lanes[jsonData.lane].data.bowlers = {};
+						lanes[jsonData.lane].data.pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+					} else {
+						bowlerAmt = 0;
+						gamesAmt = 0;
+						currentBowler = "";
+						currentGame = 0;
+						currentFrame = 1;
+						past_games = [];
+						bowlers = {};
+						pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+					}
+				}
 			}
 
 			// Admin
@@ -212,10 +242,13 @@
 				}
 			} else if (jsonData.command === "set_bowlers") {
 				if (jsonData.response === true) {
-					console.log(lanes);
-					console.log(jsonData.lane);
-					console.log(lanes[jsonData.lane]);
 					lanes[jsonData.lane].data.bowlerAmt = jsonData.bowlers;
+				}
+			} else if (jsonData.command === "add_bowler") {
+				if (jsonData.response === true) {
+					lanes[jsonData.lane].data.past_games = jsonData.past_games;
+					lanes[jsonData.lane].data.bowlers = jsonData.bowlers;
+					lanes[jsonData.lane].data.bowlerAmt += 1;
 				}
 			}
 		};

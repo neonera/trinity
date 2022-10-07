@@ -5,14 +5,16 @@
 	import DotPins from "../lib/DotPins.svelte";
 	import { socket_functions } from "../App.svelte";
 	import { fade } from "svelte/transition";
+	import Icon from "@iconify/svelte";
 
 	export let lanes: Lanes;
 	export let current_lane: number;
 
-	let creating_session: boolean = false;
-	let edit_bowler: string = "";
+	let type: string = "";
+	let data: string | boolean = "";
 	let creating_session_games: number = 1;
 	let creating_session_bowlers: number = 1;
+	let add_bowler_name: string = "";
 
 	let current_data: LanesData;
 	let calc_frames: { [bowler: string]: CalcFrames } = {};
@@ -59,31 +61,62 @@
 		<div class="session">
 			{#if current_data.gamesAmt === 0}
 				<div class="center" style="width: 100%; height: 100%;">
-					<div class="new-session" on:click={() => (creating_session = true)}>
+					<div
+						class="new-session"
+						on:click={() => {
+							creating_session_bowlers = 1;
+							creating_session_games = 1;
+							type = "create_session";
+							data = false;
+						}}>
 						<h1>New session</h1>
 					</div>
 				</div>
 			{:else}
-				<h1>
-					Session
-					<span>
-						- Game {current_data.currentGame} of {current_data.gamesAmt} - {Object.keys(
-							current_data.bowlers
-						).length < current_data.bowlerAmt || current_data.currentFrame === 11
-							? current_data.currentGame === current_data.gamesAmt
-								? "Finished"
-								: "Waiting..."
-							: "In progress - Frame " + current_data.currentFrame + " of 10"}
-					</span>
-				</h1>
+				<div class="session-top">
+					<h1>
+						Session
+						<span>
+							- Game {current_data.currentGame} of {current_data.gamesAmt} - {Object.keys(
+								current_data.bowlers
+							).length < current_data.bowlerAmt || current_data.currentFrame === 11
+								? current_data.currentGame === current_data.gamesAmt
+									? "Finished"
+									: "Waiting..."
+								: "In progress - Frame " + current_data.currentFrame + " of 10"}
+						</span>
+					</h1>
+					<div style="display: flex;">
+						<div
+							on:click={() => {
+								creating_session_bowlers = lanes[current_lane].data.bowlerAmt;
+								creating_session_games = lanes[current_lane].data.gamesAmt;
+								type = "create_session";
+								data = true;
+							}}>
+							<Icon icon="ic:outline-edit" class="action-icon" width={35} height={35} />
+						</div>
+						<div on:click={() => (type = "stop_session")}>
+							<Icon icon="ic:outline-stop-circle" class="action-icon stop-icon" width={35} height={35} />
+						</div>
+					</div>
+				</div>
 				<div class="bowlers">
-					<h1>Bowlers</h1>
+					<div class="bowlers-top">
+						<h1>Bowlers</h1>
+						<div on:click={() => (type = "add_bowler")}>
+							<Icon icon="ic:outline-person-add" class="action-icon" width={30} height={30} />
+						</div>
+					</div>
 					<div class="bowler-list">
 						{#each Object.keys(current_data.bowlers ?? {}) as bowler}
 							<h1
 								class:current-bowler={bowler === current_data.currentBowler &&
 									current_data.currentFrame < 11}
-								on:click={() => (edit_bowler = bowler)}>
+								on:click={() => {
+									type = "edit_bowler";
+									data = bowler;
+								}}>
 								{bowler}
 							</h1>
 						{/each}
@@ -93,39 +126,95 @@
 		</div>
 	{/if}
 </div>
-{#if creating_session}
-	<div
-		class="dialog creating-session"
-		on:click={() => (creating_session = false)}
-		transition:fade={{ duration: 200 }}>
+{#if type === "create_session"}
+	<div class="dialog small-dialog" on:click={() => (type = "")} transition:fade={{ duration: 200 }}>
 		<div on:click={(event) => event.stopPropagation()}>
-			<h1>New session</h1>
+			<h1>{data ? "Edit" : "New"} session</h1>
 			<div class="creating-session-flex">
 				<h1>Games:</h1>
-				<input type="number" class="number-input" bind:value={creating_session_games} min="1" />
+				<input
+					type="number"
+					class="number-input"
+					bind:value={creating_session_games}
+					min={data
+						? lanes[current_lane].data.currentGame > 0
+							? lanes[current_lane].data.currentGame.toString()
+							: "1"
+						: "1"} />
 			</div>
-			<div class="creating-session-flex">
-				<h1>Bowlers:</h1>
-				<input type="number" class="number-input" bind:value={creating_session_bowlers} min="1" />
-			</div>
-			<div style="display: flex; align-items: center; justify-content: center; margin-top: 93px;">
+			{#if !data}
+				<div class="creating-session-flex">
+					<h1>Bowlers:</h1>
+					<input type="number" class="number-input" bind:value={creating_session_bowlers} min="1" />
+				</div>
+			{/if}
+			<div
+				style="display: flex; align-items: center; justify-content: center; margin-top: {data
+					? '83'
+					: '43'}px;">
 				<div
 					class="new-session"
 					on:click={() => {
-						socket_functions.set_bowlers(current_lane, creating_session_bowlers);
+						if (!data) socket_functions.set_bowlers(current_lane, creating_session_bowlers);
 						socket_functions.set_games(current_lane, creating_session_games);
-						creating_session = false;
+						type = "";
 					}}>
-					<h1>Start session</h1>
+					<h1>{data ? "Edit" : "Start"} session</h1>
 				</div>
 			</div>
 		</div>
 	</div>
-{/if}
-{#if edit_bowler !== ""}
-	<div class="dialog edit-bowler" on:click={() => (edit_bowler = "")} transition:fade={{ duration: 200 }}>
+{:else if type === "stop_session"}
+	<div class="dialog small-dialog" on:click={() => (type = "")} transition:fade={{ duration: 200 }}>
 		<div on:click={(event) => event.stopPropagation()}>
-			<h1>{edit_bowler}</h1>
+			<h1>Stop session</h1>
+			<div style="display: flex; align-items: center; justify-content: center; margin-top: 123px;">
+				<div
+					class="new-session stop-session"
+					on:click={() => {
+						socket_functions.stop_session(current_lane);
+						type = "";
+					}}>
+					<h1>Stop session</h1>
+				</div>
+			</div>
+		</div>
+	</div>
+{:else if type === "add_bowler"}
+	<div
+		class="dialog small-dialog"
+		on:click={() => {
+			type = "";
+			add_bowler_name = "";
+		}}
+		transition:fade={{ duration: 200 }}>
+		<div on:click={(event) => event.stopPropagation()}>
+			<h1>Add bowler</h1>
+			<div class="creating-session-flex">
+				<h1>Name:</h1>
+				<input type="text" class="text-input" bind:value={add_bowler_name} style="text-transform: uppercase;" />
+			</div>
+			<div style="display: flex; align-items: center; justify-content: center; margin-top: 86px;">
+				{#if Object.keys(lanes[current_lane].data.bowlers).length === 0 || lanes[current_lane].data.bowlers[Object.keys(lanes[current_lane].data.bowlers)[0]].frames.length > 0}
+					<h1 class="button-warning">Game needs to be started with no pins bowled</h1>
+				{:else}
+					<div
+						class="new-session"
+						on:click={() => {
+							socket_functions.add_bowler(current_lane, add_bowler_name.toUpperCase());
+							type = "";
+							add_bowler_name = "";
+						}}>
+						<h1>Add bowler</h1>
+					</div>
+				{/if}
+			</div>
+		</div>
+	</div>
+{:else if type === "edit_bowler"}
+	<div class="dialog large-dialog" on:click={() => (type = "")} transition:fade={{ duration: 200 }}>
+		<div on:click={(event) => event.stopPropagation()}>
+			<h1>{data}</h1>
 		</div>
 	</div>
 {/if}
@@ -210,11 +299,47 @@
 	.new-session:active {
 		background-color: hsl(220deg 50% 45%);
 	}
+	.stop-session {
+		background-color: hsl(0deg 60% 50%);
+	}
+	.stop-session:hover {
+		background-color: hsl(0deg 50% 55%);
+	}
+	.stop-session:active {
+		background-color: hsl(0deg 50% 45%);
+	}
 
-	.session > h1 > span {
+	.session-top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.session-top > h1 > span {
 		font-size: 24px;
 		color: #fff8;
 	}
+	:global(.action-icon) {
+		cursor: pointer;
+	}
+	:global(.action-icon) > :global(path) {
+		fill: hsl(0, 0%, 80%);
+	}
+	:global(.action-icon):hover > :global(path) {
+		fill: hsl(0, 0%, 100%);
+	}
+	:global(.action-icon):active > :global(path) {
+		fill: hsl(0, 0%, 70%);
+	}
+	:global(.stop-icon) > :global(path) {
+		fill: hsl(0, 70%, 57%);
+	}
+	:global(.stop-icon):hover > :global(path) {
+		fill: hsl(0, 70%, 65%);
+	}
+	:global(.stop-icon):active > :global(path) {
+		fill: hsl(0, 70%, 52%);
+	}
+
 	.bowlers {
 		flex: 1;
 		width: 500px;
@@ -228,7 +353,12 @@
 		display: flex;
 		flex-direction: column;
 	}
-	.bowlers > h1 {
+	.bowlers-top {
+		display: flex;
+		/* align-items: center; */
+		justify-content: space-between;
+	}
+	.bowlers-top > h1 {
 		font-size: 28px;
 	}
 	.bowler-list {
@@ -280,17 +410,26 @@
 		border-radius: 20px;
 		box-sizing: border-box;
 	}
-	.edit-bowler > div {
+	.small-dialog > div {
+		width: 400px;
+		height: 250px;
+		top: calc(50% - 125px);
+		left: calc(50% - 200px);
+	}
+	.large-dialog > div {
 		width: 500px;
 		height: 600px;
 		top: calc(50% - 300px);
 		left: calc(50% - 250px);
 	}
-	.creating-session > div {
-		width: 400px;
-		height: 300px;
-		top: calc(50% - 150px);
-		left: calc(50% - 200px);
+	.button-warning {
+		height: 43px;
+		padding: 0 20%;
+
+		color: #fffa;
+		font-size: 16px;
+		text-align: center;
+		overflow: hidden;
 	}
 
 	.creating-session-flex {
@@ -316,5 +455,16 @@
 		outline: none;
 		border-radius: 10px;
 		box-sizing: border-box;
+	}
+	.text-input {
+		padding: 5px 10px;
+
+		background-color: #0004;
+		font-size: 16px;
+		font-family: Avenir;
+		font-weight: 600;
+		border: none;
+		outline: none;
+		border-radius: 10px;
 	}
 </style>
