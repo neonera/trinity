@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade } from "svelte/transition";
 	import Icon from "@iconify/svelte";
-	import type { BowlersType, PinsType } from "../types";
+	import type { BowlersType, LanesData, PinsType } from "../types";
 	import { calculateFrames } from "../smallFunctions";
 	import Intro from "./Intro.svelte";
 	import TopBar from "./TopBar.svelte";
@@ -11,19 +11,15 @@
 	import LaneChat from "./MainPanel/LaneChat.svelte";
 	import Bowlers from "./MainPanel/Bowlers.svelte";
 	import Stats from "./MainPanel/Stats.svelte";
-
-	export let bowlingAlleyName: string;
-	export let bowlingAlleyColor: string;
-	export let bowlerAmt: number;
-	export let gamesAmt: number;
-	export let currentGame: number;
-	export let startGame: (names: string[]) => any;
+	import { socket_functions } from "../App.svelte";
 
 	export let laneNumber: number;
-	export let bowlers: BowlersType;
-	export let pins: PinsType;
-	export let currentBowler: string;
-	export let currentFrame: number;
+	export let bowlingAlleyName: string;
+	export let bowlingAlleyColor: string;
+	export let laneData: LanesData;
+
+	let bowlers: BowlersType;
+	$: bowlers = laneData.bowlers;
 
 	let mainPanelPage = "progress";
 	const setPage = (page: string) => (mainPanelPage = page);
@@ -49,14 +45,14 @@
 </script>
 
 {#if Object.keys(bowlers).length === 0}
-	<Intro {laneNumber} {bowlingAlleyName} {bowlingAlleyColor} {bowlerAmt} {gamesAmt} {startGame} />
+	<Intro {laneNumber} {bowlingAlleyName} {bowlingAlleyColor} {laneData} />
 {:else}
 	<main style="display: flex; flex-direction: column; ">
-		<TopBar {laneNumber} {bowlers} {pins} {currentBowler} {currentFrame} />
+		<TopBar {laneNumber} {laneData} />
 		<div style="display: flex; flex: 1;">
 			<div class="main-panel">
 				{#if mainPanelPage === "progress"}
-					<GameProgress {bowlers} {gamesAmt} {currentGame} />
+					<GameProgress {laneData} />
 				{:else if mainPanelPage === "themes"}
 					<Themes />
 				{:else if mainPanelPage === "chat"}
@@ -71,23 +67,25 @@
 		</div>
 	</main>
 {/if}
-{#if currentFrame === 11}
+{#if laneData.currentFrame === 11}
 	<div class="end-game-overlay" transition:fade>
 		<div>
 			<h1 style="margin-bottom: 10px;">Game results:</h1>
 			{#each sortedScores as bowler}
 				<div class="bowler-rank" style="margin-bottom: 10px;">
-					<div class="place-badge" style="background-color: {rankColors[bowlersRanks[bowler] - 1] ?? 'transparent'};">
+					<div
+						class="place-badge"
+						style="background-color: {rankColors[bowlersRanks[bowler] - 1] ?? 'transparent'};">
 						<h1>#{bowlersRanks[bowler]}</h1>
 					</div>
 					<h1 style="flex: 1;">{bowler}</h1>
 					<h1>{bowlersScores[bowler]}</h1>
 				</div>
 			{/each}
-			{#if gamesAmt === currentGame}
+			{#if laneData.gamesAmt === laneData.currentGame}
 				<h1 class="contact-front-desk">Contact the Front Desk to buy more games.</h1>
 			{:else}
-				<div class="start-game" on:click={() => startGame(Object.keys(bowlers))}>
+				<div class="start-game" on:click={() => socket_functions.start_game(Object.keys(bowlers))}>
 					<Icon icon="ic:baseline-restart-alt" width={40} height={40} />
 					<h1>Start new game</h1>
 				</div>

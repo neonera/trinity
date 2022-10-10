@@ -1,13 +1,21 @@
 <script lang="ts">
 	import Icon from "@iconify/svelte";
+	import { socket_functions } from "../App.svelte";
+	import type { LanesData } from "../types";
 	import Keyboard from "../lib/Keyboard.svelte";
 
 	export let laneNumber: number;
 	export let bowlingAlleyName: string;
 	export let bowlingAlleyColor: string;
-	export let bowlerAmt: number;
-	export let gamesAmt: number;
-	export let startGame: (names: string[]) => any;
+	export let laneData: LanesData;
+
+	let bowlersAmt: number;
+	let gamesAmt: number;
+
+	$: {
+		bowlersAmt = laneData.bowlersAmt;
+		gamesAmt = laneData.gamesAmt;
+	}
 
 	let currentBowler: number = 1;
 	let editingBowler: number = -1;
@@ -24,7 +32,7 @@
 
 	const submitButton = () => {
 		const editing = editingBowler > -1;
-		if (!editing && currentBowler > bowlerAmt) startGame(names);
+		if (!editing && currentBowler > bowlersAmt) socket_functions.start_game(names);
 
 		if (!currentName) {
 			error = "You can't have an empty name.";
@@ -56,8 +64,8 @@
 				Welcome to <span style="color: {bowlingAlleyColor};">{bowlingAlleyName}</span>.
 			</h1>
 			<div style="display: flex; flex-direction: column; align-items: end;">
-				{#if bowlerAmt > 0}
-					<h1 class="bowlers-amount">{bowlerAmt} bowler{bowlerAmt === 1 ? "" : "s"}</h1>
+				{#if bowlersAmt > 0}
+					<h1 class="bowlers-amount">{bowlersAmt} bowler{bowlersAmt === 1 ? "" : "s"}</h1>
 				{/if}
 				{#if gamesAmt > 0}
 					<h1 class="bowlers-amount">{gamesAmt} game{gamesAmt === 1 ? "" : "s"}</h1>
@@ -65,13 +73,13 @@
 			</div>
 		</div>
 	</div>
-	{#if bowlerAmt === 0}
+	{#if bowlersAmt === 0}
 		<div class="center" style="flex: 1; flex-direction: column;">
 			<h1>Waiting for bowlers...!</h1>
 			<h1 style="color: #fffa;">Buy games at the Front Desk.</h1>
 		</div>
 	{:else}
-		{#if currentBowler > bowlerAmt && editingBowler === -1}
+		{#if currentBowler > bowlersAmt && editingBowler === -1}
 			<div style="margin-top: 20px; flex: 1; display: flex; flex-direction: column; align-items: center;">
 				<h1>Bowler names:</h1>
 				<h1 style="font-size: 24px; color: #fff8; margin-bottom: 20px;">(press any name to change it)</h1>
@@ -91,7 +99,7 @@
 				<h1>
 					{editingBowler > -1
 						? `Editing Bowler ${editingBowler + 1}`
-						: `Bowler ${currentBowler} of ${bowlerAmt}`}
+						: `Bowler ${currentBowler} of ${bowlersAmt}`}
 				</h1>
 				<div class="center" style="flex: 1;">
 					<h1 class="current-name" style={!currentName ? "color: #fff8;" : "border-color: #5c5f66;"}>
@@ -105,7 +113,7 @@
 			<h1>{error}</h1>
 			<div class="submit-button" on:click={submitButton}>
 				<Icon icon="ic:baseline-send" width={30} height={30} />
-				<h1>{currentBowler > bowlerAmt && editingBowler === -1 ? "Start Game" : "Submit"}</h1>
+				<h1>{currentBowler > bowlersAmt && editingBowler === -1 ? "Start Game" : "Submit"}</h1>
 			</div>
 		</div>
 	{/if}

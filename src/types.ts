@@ -6,6 +6,33 @@ export type BowlersType = {
 
 export type PinsType = number[];
 
+// TESTING NEW ARC
+
+const bowlers = [{ name: "Bruh" }, { name: "ay", deleted: true }, { name: "K" }];
+const frames = [
+	[
+		[10, 0],
+		[8, 1],
+	],
+	[[9, 0]],
+];
+const pastGames = [
+	[
+		[
+			[8, 0],
+			[6, 1],
+		],
+		[[5, 4]],
+	],
+	[
+		[
+			[6, 2],
+			[6, 3],
+		],
+		[[10, 0]],
+	],
+];
+
 // Admin
 export type Lanes = {
 	[lane: number]: {
@@ -14,13 +41,14 @@ export type Lanes = {
 		data: LanesData;
 	};
 };
+
 export type LanesData = {
-	bowlerAmt: number;
+	bowlersAmt: number;
 	gamesAmt: number;
 	currentBowler: string;
 	currentGame: number;
 	currentFrame: number;
-	past_games: BowlersType[];
 	bowlers: BowlersType;
+	pastGames: BowlersType[];
 	pins: PinsType;
 };

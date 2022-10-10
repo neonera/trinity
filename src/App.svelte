@@ -22,16 +22,15 @@
 </script>
 
 <script lang="ts">
-	import { onMount, onDestroy } from "svelte";
-	import type { BowlersType, Lanes, PinsType } from "./types";
+	import type { BowlersType, Lanes, LanesData, PinsType } from "./types";
 	import UserScreen from "./UserScreen/UserScreen.svelte";
 	import TVScreen from "./TVScreen/TVScreen.svelte";
 	import AdminScreen from "./AdminScreen/AdminScreen.svelte";
 
-	let bowlingAlleyName = "Lava Lanes";
-	let bowlingAlleyColor = "hsl(8deg, 75%, 50%)";
-	let laneNumber = 27;
-	let bowlerAmt = 0;
+	let bowlingAlleyName = "";
+	let bowlingAlleyColor = "";
+	let laneNumber = 0;
+	let bowlersAmt = 0;
 	let gamesAmt = 0;
 	let currentGame = 0;
 	let screenType = "";
@@ -40,7 +39,17 @@
 	let lanes: Lanes = {};
 
 	// TV/User
-	let past_games: BowlersType[] = [];
+	let laneData: LanesData = {
+		bowlersAmt: 0,
+		gamesAmt: 0,
+		currentBowler: "",
+		currentGame: 0,
+		currentFrame: 0,
+		bowlers: {},
+		pastGames: [],
+		pins: [],
+	};
+	let pastGames: BowlersType[] = [];
 	let bowlers: BowlersType = {};
 	let pins: PinsType = [];
 	let currentBowler = "";
@@ -96,7 +105,7 @@
 	};
 
 	const startGame = (names: string[]) => {
-		// if (currentGame > 0) past_games.push(bowlers);
+		// if (currentGame > 0) pastGames.push(bowlers);
 		// names.forEach((name) => {
 		// 	bowlers[name] = { frames: [] };
 		// });
@@ -137,7 +146,7 @@
 	};
 	resetGame();
 
-	$: if (bowlerAmt === 0) resetGame();
+	$: if (bowlersAmt === 0) resetGame();
 
 	const startSocket = (lane: number, type: "tv" | "user" | "admin", pass?: string) => {
 		socket?.close?.();
@@ -148,15 +157,36 @@
 		};
 
 		socket.onmessage = (event) => {
+			console.log(event.data.length);
 			const jsonData = JSON.parse(event.data);
 			console.log("WebSocket received:", jsonData);
+			if (jsonData.command === "initialize") {
+				if (jsonData.response === true) {
+					laneNumber = jsonData.lane;
+					screenType = jsonData.type;
+					bowlingAlleyName = jsonData.bowlingAlleyName;
+					bowlingAlleyColor = jsonData.bowlingAlleyColor;
 
+					if (jsonData.type === "admin") {
+						lanes = jsonData.lanes;
+					} else {
+						laneData = jsonData.laneData;
+					}
+				}
+			} else if (jsonData.command === "update_lanes") {
+				if (screenType === "admin") {
+					lanes = jsonData.lanes;
+				} else {
+					laneData = jsonData.laneData;
+				}
+			}
+			/*
 			if (jsonData.command === "initialize") {
 				if (jsonData.response === true) {
 					laneNumber = jsonData.lane;
 					screenType = jsonData.type;
 
-					bowlerAmt = jsonData.bowlerAmt;
+					bowlersAmt = jsonData.bowlersAmt;
 					gamesAmt = jsonData.gamesAmt;
 					currentBowler = jsonData.currentBowler;
 					currentFrame = jsonData.currentFrame;
@@ -175,18 +205,18 @@
 				}
 			} else if (jsonData.command === "get_bowlers") {
 				if (jsonData.response === true) {
-					bowlerAmt = jsonData.bowlers;
+					bowlersAmt = jsonData.bowlers;
 				}
 			} else if (jsonData.command === "get_add_bowler") {
 				if (jsonData.response === true) {
-					past_games = jsonData.past_games;
+					pastGames = jsonData.pastGames;
 					bowlers = jsonData.bowlers;
-					bowlerAmt += 1;
+					bowlersAmt += 1;
 				}
 			} else if (jsonData.command === "start_game") {
 				if (jsonData.response === true) {
 					if (screenType === "admin") {
-						// if (currentGame > 0) past_games.push(bowlers);
+						// if (currentGame > 0) pastGames.push(bowlers);
 						// jsonData.names.forEach((name) => {
 						// 	bowlers[name] = { frames: [] };
 						// });
@@ -195,7 +225,7 @@
 						// currentBowler = jsonData.names[0];
 						// currentGame++;
 					} else {
-						if (currentGame > 0) past_games.push(bowlers);
+						if (currentGame > 0) pastGames.push(bowlers);
 						jsonData.names.forEach((name) => {
 							bowlers[name] = { frames: [] };
 						});
@@ -212,21 +242,21 @@
 			} else if (jsonData.command === "stop_session") {
 				if (jsonData.response === true) {
 					if (screenType === "admin") {
-						lanes[jsonData.lane].data.bowlerAmt = 0;
+						lanes[jsonData.lane].data.bowlersAmt = 0;
 						lanes[jsonData.lane].data.gamesAmt = 0;
 						lanes[jsonData.lane].data.currentBowler = "";
 						lanes[jsonData.lane].data.currentGame = 0;
 						lanes[jsonData.lane].data.currentFrame = 1;
-						lanes[jsonData.lane].data.past_games = [];
+						lanes[jsonData.lane].data.pastGames = [];
 						lanes[jsonData.lane].data.bowlers = {};
 						lanes[jsonData.lane].data.pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 					} else {
-						bowlerAmt = 0;
+						bowlersAmt = 0;
 						gamesAmt = 0;
 						currentBowler = "";
 						currentGame = 0;
 						currentFrame = 1;
-						past_games = [];
+						pastGames = [];
 						bowlers = {};
 						pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 					}
@@ -242,15 +272,16 @@
 				}
 			} else if (jsonData.command === "set_bowlers") {
 				if (jsonData.response === true) {
-					lanes[jsonData.lane].data.bowlerAmt = jsonData.bowlers;
+					lanes[jsonData.lane].data.bowlersAmt = jsonData.bowlers;
 				}
 			} else if (jsonData.command === "add_bowler") {
 				if (jsonData.response === true) {
-					lanes[jsonData.lane].data.past_games = jsonData.past_games;
+					lanes[jsonData.lane].data.pastGames = jsonData.pastGames;
 					lanes[jsonData.lane].data.bowlers = jsonData.bowlers;
-					lanes[jsonData.lane].data.bowlerAmt += 1;
+					lanes[jsonData.lane].data.bowlersAmt += 1;
 				}
 			}
+			*/
 		};
 
 		socket.onclose = (event) => {
@@ -261,29 +292,9 @@
 
 <svelte:window on:keypress={keyPress} />
 {#if screenType === "user"}
-	<UserScreen
-		{bowlingAlleyName}
-		{bowlingAlleyColor}
-		{bowlerAmt}
-		{gamesAmt}
-		{currentGame}
-		{startGame}
-		{laneNumber}
-		{bowlers}
-		{pins}
-		{currentBowler}
-		{currentFrame} />
+	<UserScreen {laneNumber} {bowlingAlleyName} {bowlingAlleyColor} {laneData} />
 {:else if screenType === "tv"}
-	<TVScreen
-		{bowlingAlleyName}
-		{bowlingAlleyColor}
-		{bowlerAmt}
-		{gamesAmt}
-		{laneNumber}
-		{bowlers}
-		{pins}
-		{currentBowler}
-		{currentFrame} />
+	<TVScreen {bowlingAlleyName} {bowlingAlleyColor} {laneData} {laneNumber} />\
 {:else if screenType === "admin"}
 	<AdminScreen {bowlingAlleyName} {bowlingAlleyColor} {lanes} />
 {:else}

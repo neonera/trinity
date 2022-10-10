@@ -1,16 +1,25 @@
 <script lang="ts">
 	import Icon from "@iconify/svelte";
-	import type { BowlersType, PinsType } from "../types";
+	import type { BowlersType, LanesData, PinsType } from "../types";
 	import { calculateFrames, type CalcFrames } from "../smallFunctions";
 	import Frame from "../lib/Frame.svelte";
 	import DotPins from "../lib/DotPins.svelte";
 
 	export let laneNumber: number;
-	export let bowlers: BowlersType;
-	export let pins: PinsType;
+	export let laneData: LanesData;
 	export let type: 10 | 9 | 5 = 10;
-	export let currentBowler: string;
-	export let currentFrame: number;
+	
+	let bowlers: BowlersType;
+	let pins: PinsType;
+	let currentBowler: string;
+	let currentFrame: number;
+
+	$: {
+		bowlers = laneData.bowlers;
+		pins = laneData.pins;
+		currentBowler = laneData.currentBowler;
+		currentFrame = laneData.currentFrame;
+	}
 
 	let calc_frames: CalcFrames = { values: [], currentValue: 0 };
 	$: calc_frames = calculateFrames(bowlers[currentBowler]?.frames ?? []);

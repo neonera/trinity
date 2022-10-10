@@ -1,11 +1,19 @@
 <script lang="ts">
-	import type { BowlersType } from "../../types";
+	import type { BowlersType, LanesData } from "../../types";
 	import { calculateFrames, hslToHex, type CalcFrames } from "../../smallFunctions";
 	import Progress from "../../lib/Progress.svelte";
 
-	export let bowlers: BowlersType;
-	export let gamesAmt: number;
-	export let currentGame: number;
+	export let laneData: LanesData;
+
+	let gamesAmt: number;
+	let bowlers: BowlersType;
+	let currentGame: number;
+
+	$: {
+		gamesAmt = laneData.gamesAmt;
+		bowlers = laneData.bowlers;
+		currentGame = laneData.currentGame;
+	}
 
 	let calc_frames: { [bowler: string]: CalcFrames } = {};
 	let first_place: string[] = [];

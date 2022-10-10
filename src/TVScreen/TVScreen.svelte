@@ -1,20 +1,21 @@
 <script lang="ts">
 	import { calculateFrames, type CalcFrames } from "../smallFunctions";
-	import type { BowlersType, FramesType, PinsType } from "../types";
+	import type { BowlersType, FramesType, LanesData } from "../types";
 	import Frame from "../lib/Frame.svelte";
 	import DotPins from "../lib/DotPins.svelte";
 	import Animations from "./Animations.svelte";
 
 	export let bowlingAlleyName: string;
 	export let bowlingAlleyColor: string;
-	export let bowlerAmt: number;
-	export let gamesAmt: number;
-
+	export let laneData: LanesData;
 	export let laneNumber: number;
-	export let bowlers: BowlersType;
-	export let pins: PinsType;
-	export let currentBowler: string;
-	export let currentFrame: number;
+
+	let bowlers: BowlersType = laneData.bowlers;
+	let currentBowler: string = laneData.currentBowler;
+	$: {
+		bowlers = laneData.bowlers;
+		currentBowler = laneData.currentBowler;
+	}
 
 	let calc_frames: { [bowler: string]: CalcFrames } = {};
 	let animate: string | number = "";
@@ -58,27 +59,31 @@
 	<div class="lane-number">
 		<h1>{laneNumber}</h1>
 	</div>
-	{#if currentFrame === 11}
+	{#if laneData.currentFrame === 11}
 		<h1 class="end-game-text">Waiting for input on touchscreen...</h1>
 	{/if}
 	{#if Object.keys(bowlers).length === 0}
-		{#if bowlerAmt > 0}
-			<h1 style="position: absolute; top: 20px; right: 20px;">{bowlerAmt} bowler{bowlerAmt === 1 ? "" : "s"}</h1>
+		{#if laneData.bowlersAmt > 0}
+			<h1 style="position: absolute; top: 20px; right: 20px;">
+				{laneData.bowlersAmt} bowler{laneData.bowlersAmt === 1 ? "" : "s"}
+			</h1>
 		{/if}
-		{#if gamesAmt > 0}
-			<h1 style="position: absolute; top: 60px; right: 20px;">{gamesAmt} game{gamesAmt === 1 ? "" : "s"}</h1>
+		{#if laneData.gamesAmt > 0}
+			<h1 style="position: absolute; top: 60px; right: 20px;">
+				{laneData.gamesAmt} game{laneData.gamesAmt === 1 ? "" : "s"}
+			</h1>
 		{/if}
 		<div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
 			<h1 style="font-size: 48px;">
 				Welcome to <span style="color: {bowlingAlleyColor};">{bowlingAlleyName}</span>.
 			</h1>
-			{#if bowlerAmt > 0}
+			{#if laneData.bowlersAmt > 0}
 				<h1 style="margin-top: 10px; color: #fffa;">Waiting for bowler names...</h1>
 			{/if}
 		</div>
 	{:else}
 		<div class="pins">
-			<DotPins {pins} />
+			<DotPins pins={laneData.pins} />
 		</div>
 		{#each Object.keys(bowlers) as bowler, bowler_index}
 			<div class="bowler-row">
@@ -94,7 +99,7 @@
 						score={i + 1 === 11
 							? calc_frames[bowler].values.reduce((acc, val) => (val && val > acc ? val : acc), 0)
 							: calc_frames[bowler].values[i] ?? null}
-						{currentFrame}
+						currentFrame={laneData.currentFrame}
 						frameNumber={i + 1}
 						showFrameNumber={bowler_index === 0}
 						style={bowler_index === 0 ? "height: 110px;" : ""}

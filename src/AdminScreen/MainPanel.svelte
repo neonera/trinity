@@ -79,7 +79,7 @@
 						<span>
 							- Game {current_data.currentGame} of {current_data.gamesAmt} - {Object.keys(
 								current_data.bowlers
-							).length < current_data.bowlerAmt || current_data.currentFrame === 11
+							).length < current_data.bowlersAmt || current_data.currentFrame === 11
 								? current_data.currentGame === current_data.gamesAmt
 									? "Finished"
 									: "Waiting..."
@@ -89,7 +89,7 @@
 					<div style="display: flex;">
 						<div
 							on:click={() => {
-								creating_session_bowlers = lanes[current_lane].data.bowlerAmt;
+								creating_session_bowlers = lanes[current_lane].data.bowlersAmt;
 								creating_session_games = lanes[current_lane].data.gamesAmt;
 								type = "create_session";
 								data = true;
