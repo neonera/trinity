@@ -117,15 +117,17 @@
 	};
 
 	const keyPress = (event: KeyboardEvent) => {
-		if (event.key === "u") {
-			screenType = "user";
-			startSocket(1, "user");
-		} else if (event.key === "t") {
-			screenType = "tv";
-			startSocket(1, "tv");
-		} else if (event.key === "a") {
-			screenType = "admin";
-			startSocket(0, "admin", "test");
+		if (screenType === "") {
+			if (event.key === "u") {
+				screenType = "user";
+				startSocket(1, "user");
+			} else if (event.key === "t") {
+				screenType = "tv";
+				startSocket(1, "tv");
+			} else if (event.key === "a") {
+				screenType = "admin";
+				startSocket(0, "admin", "test");
+			}
 		} else if (event.key === "n") {
 			const alley_names = ["Lava Lanes", "Roxy Ann Lanes", "Caveman Bowl"];
 			const alley_colors = ["hsl(8deg, 75%, 50%)", "hsl(355deg, 60%, 50%)", "hsl(180deg, 60%, 55%)"];
@@ -157,7 +159,19 @@
 		};
 
 		socket.onmessage = (event) => {
-			console.log(event.data.length);
+			// For checking websocket payload size
+			const color = "hsl(272deg 87% 85%)";
+			if (event.data.length < 1_000) {
+				const num = event.data.length;
+				console.log("%c" + num + " B", `color: ${color};`);
+			} else if (event.data.length < 1_000_000) {
+				const num = (event.data.length / 1_000).toFixed(2);
+				console.log("%c" + num + " KB", `color: ${color};`);
+			} else {
+				const num = (event.data.length / 1_000_000).toFixed(2);
+				console.log("%c" + num + " MB", `color: ${color};`);
+			}
+
 			const jsonData = JSON.parse(event.data);
 			console.log("WebSocket received:", jsonData);
 			if (jsonData.command === "initialize") {
@@ -173,115 +187,23 @@
 						laneData = jsonData.laneData;
 					}
 				}
-			} else if (jsonData.command === "update_lanes") {
+			} else if (jsonData.command === "update_lane") {
 				if (screenType === "admin") {
-					lanes = jsonData.lanes;
-				} else {
-					laneData = jsonData.laneData;
-				}
-			}
-			/*
-			if (jsonData.command === "initialize") {
-				if (jsonData.response === true) {
-					laneNumber = jsonData.lane;
-					screenType = jsonData.type;
-
-					bowlersAmt = jsonData.bowlersAmt;
-					gamesAmt = jsonData.gamesAmt;
-					currentBowler = jsonData.currentBowler;
-					currentFrame = jsonData.currentFrame;
-					currentGame = jsonData.currentGame;
-
-					bowlers = jsonData.bowlers;
-					pins = jsonData.pins;
-
-					if (jsonData.type === "admin") {
-						lanes = jsonData.lanes;
-					}
-				}
-			} else if (jsonData.command === "get_games") {
-				if (jsonData.response === true) {
-					gamesAmt = jsonData.games;
-				}
-			} else if (jsonData.command === "get_bowlers") {
-				if (jsonData.response === true) {
-					bowlersAmt = jsonData.bowlers;
-				}
-			} else if (jsonData.command === "get_add_bowler") {
-				if (jsonData.response === true) {
-					pastGames = jsonData.pastGames;
-					bowlers = jsonData.bowlers;
-					bowlersAmt += 1;
-				}
-			} else if (jsonData.command === "start_game") {
-				if (jsonData.response === true) {
-					if (screenType === "admin") {
-						// if (currentGame > 0) pastGames.push(bowlers);
-						// jsonData.names.forEach((name) => {
-						// 	bowlers[name] = { frames: [] };
-						// });
-						// pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-						// currentFrame = 1;
-						// currentBowler = jsonData.names[0];
-						// currentGame++;
-					} else {
-						if (currentGame > 0) pastGames.push(bowlers);
-						jsonData.names.forEach((name) => {
-							bowlers[name] = { frames: [] };
+					if (jsonData.attr) {
+						lanes[jsonData.lane].tv = jsonData.laneData.tv;
+						lanes[jsonData.lane].user = jsonData.laneData.user;
+						jsonData.attr.forEach((attr) => {
+							lanes[jsonData.lane].data[attr] = jsonData.laneData.data[attr];
 						});
-						pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-						currentFrame = 1;
-						currentBowler = jsonData.names[0];
-						currentGame++;
-					}
-				}
-			} else if (jsonData.command === "bowl_pins") {
-				if (jsonData.response === true) {
-					bowlPins(jsonData.pins_knocked);
-				}
-			} else if (jsonData.command === "stop_session") {
-				if (jsonData.response === true) {
-					if (screenType === "admin") {
-						lanes[jsonData.lane].data.bowlersAmt = 0;
-						lanes[jsonData.lane].data.gamesAmt = 0;
-						lanes[jsonData.lane].data.currentBowler = "";
-						lanes[jsonData.lane].data.currentGame = 0;
-						lanes[jsonData.lane].data.currentFrame = 1;
-						lanes[jsonData.lane].data.pastGames = [];
-						lanes[jsonData.lane].data.bowlers = {};
-						lanes[jsonData.lane].data.pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-					} else {
-						bowlersAmt = 0;
-						gamesAmt = 0;
-						currentBowler = "";
-						currentGame = 0;
-						currentFrame = 1;
-						pastGames = [];
-						bowlers = {};
-						pins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-					}
+					} else lanes[jsonData.lane] = jsonData.laneData;
+				} else {
+					if (jsonData.attr) {
+						jsonData.attr.forEach((attr) => {
+							laneData[attr] = jsonData.laneData[attr];
+						});
+					} else laneData = jsonData.laneData;
 				}
 			}
-
-			// Admin
-			else if (jsonData.command === "update_lanes") {
-				lanes = jsonData.lanes;
-			} else if (jsonData.command === "set_games") {
-				if (jsonData.response === true) {
-					lanes[jsonData.lane].data.gamesAmt = jsonData.games;
-				}
-			} else if (jsonData.command === "set_bowlers") {
-				if (jsonData.response === true) {
-					lanes[jsonData.lane].data.bowlersAmt = jsonData.bowlers;
-				}
-			} else if (jsonData.command === "add_bowler") {
-				if (jsonData.response === true) {
-					lanes[jsonData.lane].data.pastGames = jsonData.pastGames;
-					lanes[jsonData.lane].data.bowlers = jsonData.bowlers;
-					lanes[jsonData.lane].data.bowlersAmt += 1;
-				}
-			}
-			*/
 		};
 
 		socket.onclose = (event) => {
